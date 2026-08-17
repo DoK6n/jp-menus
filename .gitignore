@@ -1,0 +1,7 @@
+/target/
+/dist/
+/.trunk/
+*.log
+/test-results/
+/playwright-report/
+/node_modules/

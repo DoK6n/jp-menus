@@ -1,0 +1,12 @@
+{
+  "name": "jp-menus-e2e",
+  "private": true,
+  "scripts": {
+    "build": "trunk build --release",
+    "test:e2e": "npm run build && playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1"
+  }
+}
+

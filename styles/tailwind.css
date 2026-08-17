@@ -1,0 +1,135 @@
+@import "tailwindcss";
+@source "../src";
+@source "../index.html";
+
+@theme {
+  --color-paper: #f8f6f1;
+  --color-surface: #fffdfa;
+  --color-ink: #20201e;
+  --color-muted: #76736d;
+  --color-line: #e8e3d9;
+  --color-accent: #b84e3d;
+  --color-accent-soft: #f5e2dd;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Yu Gothic", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Apple SD Gothic Neo", sans-serif;
+}
+
+@layer base {
+  :root {
+    color: var(--color-ink);
+    background: #ebe8e1;
+    font-family: var(--font-sans);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    min-width: 320px;
+    background: #ebe8e1;
+  }
+
+  body {
+    min-width: 320px;
+    height: 100dvh;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  button,
+  input {
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  ::selection {
+    color: var(--color-ink);
+    background: #edc8be;
+  }
+}
+
+@layer components {
+  .app-scroll {
+    scrollbar-gutter: stable;
+  }
+
+  .app-scroll[data-detail-open="true"] {
+    overflow-y: hidden;
+  }
+
+  .study-cell-text {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .study-cell-text[data-column="term"] {
+    font-size: 19px;
+    line-height: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+  }
+
+  .study-cell-text[data-column="reading"] {
+    font-size: 14px;
+    line-height: 1.25rem;
+    font-weight: 500;
+    color: var(--color-muted);
+  }
+
+  .study-cell-text[data-column="meaning"] {
+    font-size: 14px;
+    line-height: 1.25rem;
+    font-weight: 600;
+    color: color-mix(in srgb, var(--color-ink) 85%, transparent);
+  }
+
+  .study-cell-text[data-column="term"][data-fit="compact"] {
+    font-size: 16px;
+  }
+
+  .study-cell-text[data-column="term"][data-fit="tight"] {
+    font-size: 13px;
+    letter-spacing: -0.04em;
+  }
+
+  .study-cell-text[data-column="reading"][data-fit="compact"],
+  .study-cell-text[data-column="meaning"][data-fit="compact"] {
+    font-size: 12.5px;
+    letter-spacing: -0.015em;
+  }
+
+  .study-cell-text[data-column="reading"][data-fit="tight"],
+  .study-cell-text[data-column="meaning"][data-fit="tight"] {
+    font-size: 11px;
+    letter-spacing: -0.025em;
+  }
+
+  .cell-content[data-concealed="true"] {
+    visibility: hidden;
+    user-select: none;
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
