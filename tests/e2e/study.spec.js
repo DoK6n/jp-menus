@@ -101,6 +101,20 @@ test('search and category filters narrow the catalog', async ({ page }) => {
   await expect(page.getByText('握り', { exact: true })).toHaveCount(0);
 });
 
+test('menu tabs switch catalogs and reset the category filter', async ({ page }) => {
+  await page.getByRole('button', { name: '면·카레', exact: true }).click();
+  await expect(page.getByRole('button', { name: '면·카레', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByText('ラーメン', { exact: true })).toBeVisible();
+  await expect(page.getByText('握り', { exact: true })).toHaveCount(0);
+
+  await page.getByRole('button', { name: '라멘집', exact: true }).click();
+  await expect(page.getByRole('button', { name: '라멘집', exact: true })).toHaveAttribute('aria-pressed', 'true');
+
+  await page.getByRole('button', { name: '육류·구이', exact: true }).click();
+  await expect(page.getByRole('button', { name: '전체', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByText('焼肉', { exact: true })).toBeVisible();
+});
+
 test('empty search results keep the desktop canvas position stable', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 700 });
 

@@ -4,6 +4,10 @@ use serde::{Deserialize, Serialize};
 pub struct MenuCatalog {
     pub schema_version: u8,
     pub venue_type: String,
+    #[serde(default)]
+    pub label_ja: String,
+    #[serde(default)]
+    pub label_ko: String,
     pub categories: Vec<MenuCategory>,
 }
 
@@ -13,6 +17,23 @@ impl MenuCatalog {
             .iter()
             .map(|category| category.items.len())
             .sum()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MenuLibrary {
+    pub catalogs: Vec<MenuCatalog>,
+}
+
+impl MenuLibrary {
+    pub fn total_items(&self) -> usize {
+        self.catalogs.iter().map(MenuCatalog::total_items).sum()
+    }
+
+    pub fn catalog(&self, id: &str) -> Option<&MenuCatalog> {
+        self.catalogs
+            .iter()
+            .find(|catalog| catalog.venue_type == id)
     }
 }
 

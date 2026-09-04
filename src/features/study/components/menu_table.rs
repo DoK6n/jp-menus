@@ -4,23 +4,23 @@ use leptos::prelude::*;
 
 use crate::features::study::{
     components::menu_row::MenuRow,
-    model::{MenuCatalog, StudyColumn},
+    model::{MenuLibrary, StudyColumn},
     state::StudyState,
 };
 
 #[component]
-pub fn MenuTable(catalog: Arc<MenuCatalog>) -> impl IntoView {
+pub fn MenuTable(library: Arc<MenuLibrary>) -> impl IntoView {
     let state = expect_context::<StudyState>();
-    let filtered_catalog = catalog.clone();
+    let filtered_library = library.clone();
 
     view! {
-        <section aria-label="스시 메뉴 단어" class="pb-[env(safe-area-inset-bottom)]">
+        <section aria-label="일본 메뉴 단어" class="pb-[env(safe-area-inset-bottom)]">
             <p class="border-b border-line bg-surface px-4 py-2.5 text-xs leading-5 text-muted sm:px-5">
                 "열 제목을 누르면 답을 가릴 수 있어요."
             </p>
             <table class="w-full table-fixed border-collapse">
                 <caption class="sr-only">
-                    "스시야 메뉴의 일본어 표기, 후리가나, 한국어 뜻 학습표"
+                    "일본 메뉴의 일본어 표기, 후리가나, 한국어 뜻 학습표"
                 </caption>
                 <colgroup>
                     <col class="w-[31%]" />
@@ -39,7 +39,12 @@ pub fn MenuTable(catalog: Arc<MenuCatalog>) -> impl IntoView {
                     </tr>
                 </thead>
                 <For
-                    each=move || state.filtered_groups(&filtered_catalog)
+                    each=move || {
+                        filtered_library
+                            .catalog(&state.selected_catalog())
+                            .map(|catalog| state.filtered_groups(catalog))
+                            .unwrap_or_default()
+                    }
                     // A category can stay mounted while its filtered items change.
                     // Include the visible item IDs so Leptos rebuilds that tbody.
                     key=|group| {
@@ -73,7 +78,11 @@ pub fn MenuTable(catalog: Arc<MenuCatalog>) -> impl IntoView {
                     }
                 />
             </table>
-            <Show when=move || state.filtered_groups(&catalog).is_empty()>
+            <Show when=move || {
+                library
+                    .catalog(&state.selected_catalog())
+                    .is_none_or(|catalog| state.filtered_groups(catalog).is_empty())
+            }>
                 <div class="px-6 py-16 text-center">
                     <p class="text-base font-bold">"보여줄 단어가 없어요"</p>
                     <p class="mt-2 text-sm text-muted">"검색어나 필터를 바꿔보세요."</p>

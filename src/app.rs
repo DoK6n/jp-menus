@@ -1,11 +1,11 @@
 use leptos::prelude::*;
 
-use crate::{data::sushi::load_catalog, features::study::view::StudyPage};
+use crate::{data::sushi::load_library, features::study::view::StudyPage};
 
 #[component]
 pub fn App() -> impl IntoView {
-    match load_catalog() {
-        Ok(catalog) => view! { <StudyPage catalog /> }.into_any(),
+    match load_library() {
+        Ok(library) => view! { <StudyPage library /> }.into_any(),
         Err(error) => view! {
             <main class="mx-auto flex min-h-dvh w-full max-w-[480px] items-center justify-center bg-paper px-6 text-center text-ink">
                 <section aria-labelledby="load-error-title">

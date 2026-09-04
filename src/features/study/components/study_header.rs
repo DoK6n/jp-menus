@@ -2,13 +2,13 @@ use std::sync::Arc;
 
 use leptos::{ev::Event, prelude::*};
 
-use crate::features::study::{model::MenuCatalog, state::StudyState};
+use crate::features::study::{model::MenuLibrary, state::StudyState};
 
 #[component]
-pub fn StudyHeader(catalog: Arc<MenuCatalog>) -> impl IntoView {
+pub fn StudyHeader(library: Arc<MenuLibrary>) -> impl IntoView {
     let state = expect_context::<StudyState>();
-    let total = catalog.total_items();
-    let progress_catalog = catalog.clone();
+    let total = library.total_items();
+    let progress_library = library.clone();
 
     let on_reset = move |_| {
         #[cfg(target_arch = "wasm32")]
@@ -34,13 +34,13 @@ pub fn StudyHeader(catalog: Arc<MenuCatalog>) -> impl IntoView {
         <header class="px-4 pt-[max(1.25rem,env(safe-area-inset-top))] pb-4 sm:px-5">
             <div class="flex items-end justify-between gap-4">
                 <div>
-                    <p class="text-[11px] font-bold tracking-[0.2em] text-accent uppercase">"お鮨のことば"</p>
-                    <h1 class="mt-1 text-[26px] leading-tight font-extrabold tracking-[-0.035em]">"스시 단어장"</h1>
+                    <p class="text-[11px] font-bold tracking-[0.2em] text-accent uppercase">"日本のメニュー"</p>
+                    <h1 class="mt-1 text-[26px] leading-tight font-extrabold tracking-[-0.035em]">"일본 메뉴 단어장"</h1>
                 </div>
                 <div class="shrink-0 text-right">
                     <p class="text-[11px] font-semibold text-muted">"외운 단어"</p>
                     <p class="mt-0.5 font-mono text-sm font-bold tabular-nums">
-                        {move || state.mastered_count(&progress_catalog)}
+                        {move || state.total_mastered_count(&progress_library)}
                         <span class="px-1 text-line">"/"</span>
                         {total}
                     </p>
@@ -50,7 +50,7 @@ pub fn StudyHeader(catalog: Arc<MenuCatalog>) -> impl IntoView {
             <div class="mt-3 h-1 overflow-hidden rounded-full bg-line" aria-hidden="true">
                 <div
                     class="h-full rounded-full bg-accent transition-[width] duration-200"
-                    style:width=move || format!("{}%", state.mastered_count(&catalog) * 100 / total.max(1))
+                    style:width=move || format!("{}%", state.total_mastered_count(&library) * 100 / total.max(1))
                 ></div>
             </div>
 

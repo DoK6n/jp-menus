@@ -1,6 +1,9 @@
 use std::collections::HashSet;
 
-use jp_menus::data::sushi::load_catalog;
+use jp_menus::{
+    data::sushi::{load_catalog, load_library},
+    features::study::model::MenuCatalog,
+};
 
 fn is_kebab_case(value: &str) -> bool {
     !value.is_empty()
@@ -27,6 +30,37 @@ fn sushi_catalog_meets_the_contract() {
     assert!(catalog.categories.len() >= 15);
     assert!(catalog.total_items() >= 250);
 
+    validate_catalog(&catalog, true);
+}
+
+#[test]
+fn menu_library_contains_every_imported_vocabulary_group() {
+    let library = load_library().expect("embedded menu library should parse");
+
+    assert_eq!(library.catalogs.len(), 12);
+    assert_eq!(library.total_items(), 1_576);
+
+    let mut catalog_ids = HashSet::new();
+    let mut item_ids = HashSet::new();
+    for catalog in &library.catalogs {
+        assert!(catalog_ids.insert(&catalog.venue_type));
+        assert!(!catalog.label_ja.trim().is_empty());
+        assert!(!catalog.label_ko.trim().is_empty());
+        validate_catalog(catalog, false);
+
+        for item in catalog
+            .categories
+            .iter()
+            .flat_map(|category| &category.items)
+        {
+            assert!(item_ids.insert(&item.id), "duplicate item ID: {}", item.id);
+        }
+    }
+}
+
+fn validate_catalog(catalog: &MenuCatalog, require_japanese_category_label: bool) {
+    assert_eq!(catalog.schema_version, 1);
+
     let mut category_ids = HashSet::new();
     let mut item_ids = HashSet::new();
     let mut vocabulary = HashSet::new();
@@ -42,7 +76,9 @@ fn sushi_catalog_meets_the_contract() {
             "duplicate category ID: {}",
             category.id
         );
-        assert!(!category.label_ja.trim().is_empty());
+        if require_japanese_category_label {
+            assert!(!category.label_ja.trim().is_empty());
+        }
         assert!(!category.label_ko.trim().is_empty());
         assert!(!category.items.is_empty());
 

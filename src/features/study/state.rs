@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use leptos::prelude::*;
 
 use super::{
-    model::{CellDetail, DisplayGroup, MenuCatalog, StudyColumn},
+    model::{CellDetail, DisplayGroup, MenuCatalog, MenuLibrary, StudyColumn},
     storage,
 };
 
@@ -11,6 +11,7 @@ use super::{
 pub struct StudyState {
     hidden_columns: RwSignal<HashSet<StudyColumn>>,
     mastered_ids: RwSignal<HashSet<String>>,
+    selected_catalog: RwSignal<String>,
     selected_category: RwSignal<Option<String>>,
     query: RwSignal<String>,
     hide_mastered: RwSignal<bool>,
@@ -22,6 +23,7 @@ impl StudyState {
         Self {
             hidden_columns: RwSignal::new(HashSet::new()),
             mastered_ids: RwSignal::new(storage::load_mastered_ids()),
+            selected_catalog: RwSignal::new("sushi".to_owned()),
             selected_category: RwSignal::new(None),
             query: RwSignal::new(String::new()),
             hide_mastered: RwSignal::new(false),
@@ -62,6 +64,26 @@ impl StudyState {
             .flat_map(|category| &category.items)
             .filter(|item| mastered.contains(&item.id))
             .count()
+    }
+
+    pub fn total_mastered_count(self, library: &MenuLibrary) -> usize {
+        let mastered = self.mastered_ids.read();
+        library
+            .catalogs
+            .iter()
+            .flat_map(|catalog| &catalog.categories)
+            .flat_map(|category| &category.items)
+            .filter(|item| mastered.contains(&item.id))
+            .count()
+    }
+
+    pub fn select_catalog(self, id: String) {
+        self.selected_catalog.set(id);
+        self.selected_category.set(None);
+    }
+
+    pub fn selected_catalog(self) -> String {
+        self.selected_catalog.get()
     }
 
     pub fn set_category(self, category: Option<String>) {

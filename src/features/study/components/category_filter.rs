@@ -2,12 +2,11 @@ use std::sync::Arc;
 
 use leptos::prelude::*;
 
-use crate::features::study::{model::MenuCatalog, state::StudyState};
+use crate::features::study::{model::MenuLibrary, state::StudyState};
 
 #[component]
-pub fn CategoryFilter(catalog: Arc<MenuCatalog>) -> impl IntoView {
+pub fn CategoryFilter(library: Arc<MenuLibrary>) -> impl IntoView {
     let state = expect_context::<StudyState>();
-    let categories = catalog.categories.clone();
 
     view! {
         <nav class="border-y border-line bg-paper/70 py-2" aria-label="메뉴 카테고리">
@@ -21,7 +20,12 @@ pub fn CategoryFilter(catalog: Arc<MenuCatalog>) -> impl IntoView {
                     "전체"
                 </button>
                 <For
-                    each=move || categories.clone()
+                    each=move || {
+                        library
+                            .catalog(&state.selected_catalog())
+                            .map(|catalog| catalog.categories.clone())
+                            .unwrap_or_default()
+                    }
                     key=|category| category.id.clone()
                     children=move |category| {
                         let id_for_click = category.id.clone();
