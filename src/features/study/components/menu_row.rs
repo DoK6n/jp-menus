@@ -96,7 +96,7 @@ pub fn MenuRow(item: MenuItem) -> impl IntoView {
     let item_id_for_class = item.id.clone();
 
     view! {
-        <tr class=("opacity-35", move || state.is_mastered(&item_id_for_class)) class="border-b border-line/80 bg-surface transition-opacity last:border-b-0">
+        <tr data-menu-item-row class=("opacity-35", move || state.is_mastered(&item_id_for_class)) class="border-b border-line/80 bg-surface transition-opacity last:border-b-0">
             <td class="h-16 px-2 py-2 align-middle sm:px-2.5">
                 <StudyCell value=item.term.clone() label="한자·표기" column=StudyColumn::Term kind=CellKind::Term />
             </td>

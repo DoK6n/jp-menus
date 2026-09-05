@@ -21,11 +21,22 @@ pub fn StudyPage(library: MenuLibrary) -> impl IntoView {
     let tabs_library = library.clone();
     let category_library = library.clone();
     let table_library = library.clone();
+    let scroll_library = library.clone();
 
     view! {
         <main
             class="app-scroll mx-auto h-dvh w-full max-w-[480px] overflow-y-scroll bg-surface text-ink shadow-[0_0_0_1px_rgba(32,32,30,0.04)]"
             data-detail-open=move || state.cell_detail().is_some().to_string()
+            on:scroll=move |event| {
+                let canvas = event_target::<web_sys::HtmlElement>(&event);
+                let remaining = canvas.scroll_height() - canvas.scroll_top() - canvas.client_height();
+                let has_more = scroll_library
+                    .catalog(&state.selected_catalog())
+                    .is_some_and(|catalog| state.has_more_items(catalog));
+                if remaining <= 320 && has_more {
+                    state.load_more_items();
+                }
+            }
         >
             <StudyHeader library=header_library />
             <MenuTabs library=tabs_library />

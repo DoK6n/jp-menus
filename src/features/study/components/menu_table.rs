@@ -12,6 +12,7 @@ use crate::features::study::{
 pub fn MenuTable(library: Arc<MenuLibrary>) -> impl IntoView {
     let state = expect_context::<StudyState>();
     let filtered_library = library.clone();
+    let pagination_library = library.clone();
 
     view! {
         <section aria-label="일본 메뉴 단어" class="pb-[env(safe-area-inset-bottom)]">
@@ -42,7 +43,7 @@ pub fn MenuTable(library: Arc<MenuLibrary>) -> impl IntoView {
                     each=move || {
                         filtered_library
                             .catalog(&state.selected_catalog())
-                            .map(|catalog| state.filtered_groups(catalog))
+                            .map(|catalog| state.visible_filtered_groups(catalog))
                             .unwrap_or_default()
                     }
                     // A category can stay mounted while its filtered items change.
@@ -78,6 +79,15 @@ pub fn MenuTable(library: Arc<MenuLibrary>) -> impl IntoView {
                     }
                 />
             </table>
+            <Show when=move || {
+                pagination_library
+                    .catalog(&state.selected_catalog())
+                    .is_some_and(|catalog| state.has_more_items(catalog))
+            }>
+                <p class="px-4 py-5 text-center text-xs font-semibold text-muted" role="status">
+                    "아래로 스크롤하면 단어를 더 불러와요"
+                </p>
+            </Show>
             <Show when=move || {
                 library
                     .catalog(&state.selected_catalog())

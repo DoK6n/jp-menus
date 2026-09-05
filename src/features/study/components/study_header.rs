@@ -35,7 +35,7 @@ pub fn StudyHeader(library: Arc<MenuLibrary>) -> impl IntoView {
             <div class="flex items-end justify-between gap-4">
                 <div>
                     <p class="text-[11px] font-bold tracking-[0.2em] text-accent uppercase">"日本のメニュー"</p>
-                    <h1 class="mt-1 text-[26px] leading-tight font-extrabold tracking-[-0.035em]">"일본 메뉴 단어장"</h1>
+                    <h1 class="mt-1 text-[26px] leading-tight font-extrabold tracking-[-0.035em]">"일본 메뉴 정복"</h1>
                 </div>
                 <div class="shrink-0 text-right">
                     <p class="text-[11px] font-semibold text-muted">"외운 단어"</p>

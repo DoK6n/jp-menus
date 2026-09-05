@@ -7,6 +7,8 @@ use super::{
     storage,
 };
 
+const PAGE_SIZE: usize = 60;
+
 #[derive(Clone, Copy)]
 pub struct StudyState {
     hidden_columns: RwSignal<HashSet<StudyColumn>>,
@@ -16,6 +18,7 @@ pub struct StudyState {
     query: RwSignal<String>,
     hide_mastered: RwSignal<bool>,
     cell_detail: RwSignal<Option<CellDetail>>,
+    visible_item_limit: RwSignal<usize>,
 }
 
 impl StudyState {
@@ -28,6 +31,7 @@ impl StudyState {
             query: RwSignal::new(String::new()),
             hide_mastered: RwSignal::new(false),
             cell_detail: RwSignal::new(None),
+            visible_item_limit: RwSignal::new(PAGE_SIZE),
         }
     }
 
@@ -80,6 +84,7 @@ impl StudyState {
     pub fn select_catalog(self, id: String) {
         self.selected_catalog.set(id);
         self.selected_category.set(None);
+        self.reset_visible_items();
     }
 
     pub fn selected_catalog(self) -> String {
@@ -88,6 +93,7 @@ impl StudyState {
 
     pub fn set_category(self, category: Option<String>) {
         self.selected_category.set(category);
+        self.reset_visible_items();
     }
 
     pub fn selected_category(self) -> Option<String> {
@@ -96,6 +102,7 @@ impl StudyState {
 
     pub fn set_query(self, query: String) {
         self.query.set(query);
+        self.reset_visible_items();
     }
 
     pub fn query(self) -> String {
@@ -104,6 +111,7 @@ impl StudyState {
 
     pub fn toggle_hide_mastered(self) {
         self.hide_mastered.update(|hidden| *hidden = !*hidden);
+        self.reset_visible_items();
     }
 
     pub fn hide_mastered(self) -> bool {
@@ -128,6 +136,43 @@ impl StudyState {
     pub fn reset_progress(self) {
         self.mastered_ids.set(HashSet::new());
         storage::clear_progress();
+    }
+
+    pub fn load_more_items(self) {
+        self.visible_item_limit
+            .update(|limit| *limit = limit.saturating_add(PAGE_SIZE));
+    }
+
+    pub fn has_more_items(self, catalog: &MenuCatalog) -> bool {
+        self.filtered_item_count(catalog) > self.visible_item_limit.get()
+    }
+
+    pub fn visible_filtered_groups(self, catalog: &MenuCatalog) -> Vec<DisplayGroup> {
+        let mut remaining = self.visible_item_limit.get();
+
+        self.filtered_groups(catalog)
+            .into_iter()
+            .filter_map(|mut group| {
+                if remaining == 0 {
+                    return None;
+                }
+
+                group.items.truncate(remaining);
+                remaining = remaining.saturating_sub(group.items.len());
+                (!group.items.is_empty()).then_some(group)
+            })
+            .collect()
+    }
+
+    fn reset_visible_items(self) {
+        self.visible_item_limit.set(PAGE_SIZE);
+    }
+
+    fn filtered_item_count(self, catalog: &MenuCatalog) -> usize {
+        self.filtered_groups(catalog)
+            .iter()
+            .map(|group| group.items.len())
+            .sum()
     }
 
     pub fn filtered_groups(self, catalog: &MenuCatalog) -> Vec<DisplayGroup> {

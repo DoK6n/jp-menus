@@ -52,10 +52,28 @@ test('column concealment preserves geometry and the sticky header', async ({ pag
   expect(afterCell.height).toBe(beforeCell.height);
   expect(afterRow.height).toBe(beforeRow.height);
 
+  await page.getByRole('button', { name: '한자·표기 열 보이기' }).click();
+  await expect(page.getByRole('button', { name: '한자·표기 열 가리기' })).toHaveAttribute('aria-pressed', 'false');
+  await expect(term).toHaveCSS('visibility', 'visible');
+
+  await page.getByRole('button', { name: '한자·표기 열 가리기' }).click();
+  await expect(term).toHaveCSS('visibility', 'hidden');
+
   await page.locator('main').evaluate((canvas) => canvas.scrollTo(0, 1200));
   await page.waitForTimeout(100);
   const header = await page.getByRole('button', { name: '한자·표기 열 보이기' }).boundingBox();
   expect(header.y).toBeLessThanOrEqual(1);
+});
+
+test('menu rows render in batches and load more near the bottom', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 900 });
+  const rows = page.locator('[data-menu-item-row]');
+
+  await expect(rows).toHaveCount(60);
+  await expect(page.getByRole('status')).toContainText('단어를 더 불러와요');
+
+  await page.locator('main').evaluate((canvas) => canvas.scrollTo(0, canvas.scrollHeight));
+  await expect(rows).toHaveCount(120);
 });
 
 test('mastered state dims a row and survives reload', async ({ page }) => {
@@ -151,6 +169,7 @@ test('empty search results keep the desktop canvas position stable', async ({ pa
 
 test('long cells stay on one line and expose their full value on tap', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 900 });
+  await page.getByRole('searchbox', { name: '메뉴 검색' }).fill('フィラデルフィアロール');
 
   const value = page.getByText('フィラデルフィアロール', { exact: true });
   await expect(value).toHaveAttribute('data-fit', 'tight');
