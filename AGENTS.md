@@ -20,6 +20,7 @@ Codex uses `AGENTS.md` for repository instructions. This is the equivalent proje
 - Keep the table column header sticky while scrolling.
 - Tapping/clicking a study-column header conditionally unmounts only that column's body text nodes. Keep the header, cell wrappers, column width, cell dimensions, and row height unchanged.
 - Column concealment is ephemeral and starts fully visible on every new page load.
+- Pull-to-refresh is available only for a downward single-touch gesture that starts at the top of the app scroll container. Show progress feedback and reload only after the release threshold; preserve horizontal tab gestures and normal scrolling.
 - The mastery control has its own fixed-width cell and must never overlap vocabulary text.
 - A mastered row is dimmed in place, remains reversible, and keeps its original order.
 - Persist mastered item IDs in browser local storage. A missing or malformed stored value must not prevent startup.

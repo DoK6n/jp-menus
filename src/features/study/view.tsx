@@ -2,10 +2,12 @@ import { For } from "solid-js";
 
 import { catalogById } from "../../data/catalogs";
 import type { MenuCatalog } from "./model";
+import { createPullToRefresh } from "./pull-to-refresh";
 import { createStudyState, StudyContext, useStudyState } from "./state";
 import { CategoryFilter } from "./components/category-filter";
 import { CellDetailSheet } from "./components/cell-detail-sheet";
 import { MenuTable } from "./components/menu-table";
+import { PullToRefreshIndicator } from "./components/pull-to-refresh-indicator";
 import { StudyHeader } from "./components/study-header";
 
 interface StudyPageProps {
@@ -14,6 +16,8 @@ interface StudyPageProps {
 
 export function StudyPage(props: StudyPageProps) {
   const state = createStudyState();
+  let scrollContainer: HTMLElement | undefined;
+  const pullToRefresh = createPullToRefresh(() => scrollContainer);
 
   const handleScroll = (event: Event & { currentTarget: HTMLElement }) => {
     const canvas = event.currentTarget;
@@ -27,10 +31,17 @@ export function StudyPage(props: StudyPageProps) {
   return (
     <StudyContext.Provider value={state}>
       <main
-        class="app-scroll mx-auto h-dvh w-full max-w-[480px] overflow-y-scroll bg-surface text-ink shadow-[0_0_0_1px_rgba(32,32,30,0.04)]"
+        ref={scrollContainer}
+        class="app-scroll mx-auto h-dvh w-full max-w-[480px] overflow-y-scroll overscroll-y-contain bg-surface text-ink shadow-[0_0_0_1px_rgba(32,32,30,0.04)]"
         data-detail-open={String(Boolean(state.cellDetail()))}
+        data-pull-state={pullToRefresh.phase()}
         onScroll={handleScroll}
       >
+        <PullToRefreshIndicator
+          distance={pullToRefresh.pullDistance()}
+          phase={pullToRefresh.phase()}
+          threshold={pullToRefresh.threshold}
+        />
         <StudyHeader library={props.library} />
         <MenuTabs library={props.library} />
         <CategoryFilter />

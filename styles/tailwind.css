@@ -59,6 +59,21 @@
     overflow-y: hidden;
   }
 
+  .pull-refresh-indicator {
+    visibility: visible;
+    will-change: opacity, transform;
+    transition: opacity 160ms ease, transform 160ms ease;
+  }
+
+  .pull-refresh-indicator[data-state="idle"] {
+    visibility: hidden;
+  }
+
+  .pull-refresh-indicator[data-state="pulling"],
+  .pull-refresh-indicator[data-state="ready"] {
+    transition: none;
+  }
+
   .study-cell-text {
     display: block;
     width: 100%;

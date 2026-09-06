@@ -34,6 +34,50 @@ test('desktop keeps the mobile canvas centered', async ({ page }) => {
   expect(Math.abs(canvas.x - (1440 - 480) / 2)).toBeLessThanOrEqual(1);
 });
 
+test('pulling down at the top refreshes only after crossing the threshold', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 900 });
+  const canvas = page.locator('main');
+  const indicator = page.locator('[data-pull-refresh]');
+
+  const dispatchTouch = async (type, x, y) => {
+    return canvas.evaluate(
+      (element, touch) => {
+        const event = new Event(touch.type, { bubbles: true, cancelable: true });
+        Object.defineProperty(event, 'touches', {
+          value: touch.type === 'touchend' ? [] : [{ clientX: touch.x, clientY: touch.y }],
+        });
+        element.dispatchEvent(event);
+        return element.dataset.pullState;
+      },
+      { type, x, y },
+    );
+  };
+
+  await dispatchTouch('touchstart', 188, 80);
+  expect(await dispatchTouch('touchmove', 188, 140)).toBe('pulling');
+  await expect(indicator).toHaveAttribute('data-state', 'pulling');
+  expect(await dispatchTouch('touchend', 188, 140)).toBe('idle');
+
+  await canvas.evaluate((element) => element.scrollTo(0, 300));
+  await dispatchTouch('touchstart', 188, 80);
+  expect(await dispatchTouch('touchmove', 188, 220)).toBe('idle');
+  await canvas.evaluate((element) => element.scrollTo(0, 0));
+
+  await page.evaluate(() => sessionStorage.setItem('pull-refresh-proof', 'before-reload'));
+  await dispatchTouch('touchstart', 188, 80);
+  expect(await dispatchTouch('touchmove', 188, 220)).toBe('ready');
+  await expect(indicator).toHaveAttribute('data-state', 'ready');
+
+  const reloaded = page.waitForEvent('framenavigated');
+  expect(await dispatchTouch('touchend', 188, 220)).toBe('refreshing');
+  await expect(indicator).toHaveAttribute('data-state', 'refreshing');
+  await reloaded;
+
+  await expect(page.getByRole('table')).toBeVisible();
+  await expect(canvas).toHaveAttribute('data-pull-state', 'idle');
+  expect(await page.evaluate(() => sessionStorage.getItem('pull-refresh-proof'))).toBe('before-reload');
+});
+
 test('column concealment preserves geometry and the sticky header', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.setViewportSize({ width: 375, height: 900 });
