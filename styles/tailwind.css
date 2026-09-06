@@ -116,7 +116,8 @@
 
   .cell-content {
     visibility: visible;
-    transition: none !important;
+    -webkit-transition: visibility 1ms step-end !important;
+    transition: visibility 1ms step-end !important;
   }
 
   .scrollbar-none {

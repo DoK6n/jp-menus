@@ -46,7 +46,8 @@ test('column concealment preserves geometry and the sticky header', async ({ pag
   await page.getByRole('button', { name: '한자·표기 열 가리기' }).click();
   await expect(page.getByRole('button', { name: '한자·표기 열 보이기' })).toHaveAttribute('aria-pressed', 'true');
   await expect(term).toHaveCSS('visibility', 'hidden');
-  await expect(term).toHaveCSS('transition-property', 'none');
+  await expect(term).toHaveCSS('transition-property', 'visibility');
+  await expect(term).toHaveCSS('transition-duration', '0.001s');
 
   const afterCell = await cell.boundingBox();
   const afterRow = await row.boundingBox();
