@@ -1,3 +1,5 @@
+import { Show } from "solid-js";
+
 import type { MenuItem, StudyColumn } from "../model";
 import { useStudyState } from "../state";
 import { MasteryButton } from "./mastery-button";
@@ -43,8 +45,8 @@ function StudyCell(props: StudyCellProps) {
       type="button"
       class="block w-full min-w-0 overflow-hidden rounded-md text-left outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 disabled:cursor-default"
       disabled={hidden()}
-      aria-label={`${label()} 전체 내용 보기: ${props.value}`}
-      title={props.value}
+      aria-label={hidden() ? `${label()} 가려짐` : `${label()} 전체 내용 보기: ${props.value}`}
+      title={hidden() ? undefined : props.value}
       onClick={() => state.openCellDetail(label(), props.value)}
     >
       <span
@@ -55,7 +57,7 @@ function StudyCell(props: StudyCellProps) {
         data-concealed={String(hidden())}
         aria-hidden={hidden()}
       >
-        {props.value}
+        <Show when={!hidden()}>{props.value}</Show>
       </span>
     </button>
   );

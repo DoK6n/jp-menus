@@ -68,6 +68,7 @@
   }
 
   .study-cell-text[data-column="term"] {
+    min-height: 1.5rem;
     font-size: 19px;
     line-height: 1.5rem;
     font-weight: 800;
@@ -75,6 +76,7 @@
   }
 
   .study-cell-text[data-column="reading"] {
+    min-height: 1.25rem;
     font-size: 14px;
     line-height: 1.25rem;
     font-weight: 500;
@@ -82,6 +84,7 @@
   }
 
   .study-cell-text[data-column="meaning"] {
+    min-height: 1.25rem;
     font-size: 14px;
     line-height: 1.25rem;
     font-weight: 600;
@@ -107,17 +110,6 @@
   .study-cell-text[data-column="meaning"][data-fit="tight"] {
     font-size: 11px;
     letter-spacing: -0.025em;
-  }
-
-  .cell-content[data-concealed="true"] {
-    visibility: hidden;
-    user-select: none;
-  }
-
-  .cell-content {
-    visibility: visible;
-    -webkit-transition: visibility 1ms step-end !important;
-    transition: visibility 1ms step-end !important;
   }
 
   .scrollbar-none {

@@ -38,16 +38,16 @@ test('column concealment preserves geometry and the sticky header', async ({ pag
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.setViewportSize({ width: 375, height: 900 });
   const term = page.getByText('握り', { exact: true });
-  const cell = term.locator('xpath=ancestor::td');
-  const row = term.locator('xpath=ancestor::tr');
+  const row = page.locator('[data-menu-item-row]').first();
+  const cell = row.locator('td').first();
+  const content = cell.locator('.cell-content');
   const beforeCell = await cell.boundingBox();
   const beforeRow = await row.boundingBox();
 
   await page.getByRole('button', { name: '한자·표기 열 가리기' }).click();
   await expect(page.getByRole('button', { name: '한자·표기 열 보이기' })).toHaveAttribute('aria-pressed', 'true');
-  await expect(term).toHaveCSS('visibility', 'hidden');
-  await expect(term).toHaveCSS('transition-property', 'visibility');
-  await expect(term).toHaveCSS('transition-duration', '0.001s');
+  await expect(content).toBeEmpty();
+  await expect(term).toHaveCount(0);
 
   const afterCell = await cell.boundingBox();
   const afterRow = await row.boundingBox();
@@ -57,10 +57,10 @@ test('column concealment preserves geometry and the sticky header', async ({ pag
 
   await page.getByRole('button', { name: '한자·표기 열 보이기' }).click();
   await expect(page.getByRole('button', { name: '한자·표기 열 가리기' })).toHaveAttribute('aria-pressed', 'false');
-  await expect(term).toHaveCSS('visibility', 'visible');
+  await expect(term).toBeVisible();
 
   await page.getByRole('button', { name: '한자·표기 열 가리기' }).click();
-  await expect(term).toHaveCSS('visibility', 'hidden');
+  await expect(content).toBeEmpty();
 
   await page.locator('main').evaluate((canvas) => canvas.scrollTo(0, 1200));
   await page.waitForTimeout(100);
@@ -69,7 +69,7 @@ test('column concealment preserves geometry and the sticky header', async ({ pag
 
   await page.getByRole('button', { name: '한자·표기 열 보이기' }).click();
   await expect(page.getByRole('button', { name: '한자·표기 열 가리기' })).toHaveAttribute('aria-pressed', 'false');
-  await expect(term).toHaveCSS('visibility', 'visible');
+  await expect(term).toBeVisible();
 });
 
 test('menu rows render in batches and load more near the bottom', async ({ page }) => {

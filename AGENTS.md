@@ -18,7 +18,7 @@ Codex uses `AGENTS.md` for repository instructions. This is the equivalent proje
 - The UI is mobile-only in composition. On desktop, center an app canvas no wider than 480px; do not expand into a desktop dashboard.
 - Use a semantic table with three study columns: Japanese term, reading, and Korean meaning, plus a narrow mastery-control column.
 - Keep the table column header sticky while scrolling.
-- Tapping/clicking a study-column header hides only that column's body values. Keep the header, column width, cell dimensions, and row height unchanged.
+- Tapping/clicking a study-column header conditionally unmounts only that column's body text nodes. Keep the header, cell wrappers, column width, cell dimensions, and row height unchanged.
 - Column concealment is ephemeral and starts fully visible on every new page load.
 - The mastery control has its own fixed-width cell and must never overlap vocabulary text.
 - A mastered row is dimmed in place, remains reversible, and keeps its original order.
@@ -57,7 +57,7 @@ Codex uses `AGENTS.md` for repository instructions. This is the equivalent proje
 ## UI and accessibility rules
 
 - Use actual `<table>`, `<thead>`, `<tbody>`, `<th scope="col">`, and button elements.
-- Implement concealed cell content with a wrapper and `visibility: hidden`, not `display: none`, conditional row removal, zero width, or transparent text that remains selectable.
+- Implement concealed cell content by conditionally rendering the inner text node from `hiddenColumns`. Keep its fixed-size wrapper mounted; never remove rows or cells, collapse width, or leave transparent selectable text.
 - Keep column-header toggle labels visible and expose toggle state with `aria-pressed` and a visible state cue.
 - Touch targets should be at least 44×44px even if the visible icon is smaller.
 - Provide strong `:focus-visible` styles and support `prefers-reduced-motion`.
