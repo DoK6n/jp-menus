@@ -1,6 +1,6 @@
 /target/
 /dist/
-/.trunk/
+/solid-dist/
 *.log
 /test-results/
 /playwright-report/

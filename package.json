@@ -1,12 +1,25 @@
 {
-  "name": "jp-menus-e2e",
+  "name": "jp-menus",
   "private": true,
+  "version": "0.1.0",
+  "type": "module",
   "scripts": {
-    "build": "trunk build --release",
-    "test:e2e": "npm run build && playwright test"
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test:data": "node --test tests/data-contract.test.mjs",
+    "test:e2e": "npm run build && node scripts/run-e2e.mjs",
+    "check": "tsc --noEmit && npm run test:data"
+  },
+  "dependencies": {
+    "solid-js": "1.9.15"
   },
   "devDependencies": {
-    "@playwright/test": "1.62.1"
+    "@playwright/test": "1.62.1",
+    "@tailwindcss/vite": "4.3.3",
+    "tailwindcss": "4.3.3",
+    "typescript": "7.0.2",
+    "vite": "8.2.2",
+    "vite-plugin-solid": "2.11.14"
   }
 }
-

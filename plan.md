@@ -4,7 +4,7 @@
 
 이 문서는 일본 식당과 여행 현장의 메뉴·표현을 한자·읽기·한국어 뜻으로 반복 학습하는 모바일 웹 앱의 제품 요구사항과 구현 순서를 정의한다. 후속 Codex 작업은 루트의 `AGENTS.md`와 이 문서를 먼저 읽고 진행한다.
 
-현재 상태: Leptos CSR + Tailwind CSS 4 기반 일본 메뉴 학습 앱 구현 완료. 기존 스시 317개와 `../jp/` Markdown에서 가져온 1,259개를 합쳐 12개 메뉴 탭, 1,576개 항목을 제공한다.
+현재 상태: SolidJS + TypeScript + Vite + Tailwind CSS 4 기반 일본 메뉴 학습 앱 구현 완료. 기존 스시 317개와 `../jp/` Markdown에서 가져온 1,259개를 합쳐 12개 메뉴 탭, 1,576개 항목을 제공한다.
 
 ## 2. 제품 목표
 
@@ -76,7 +76,7 @@
 ### 4.6 시각 원칙
 
 - 일본어 표기가 가장 먼저 읽히도록 약간 큰 글자를 사용한다. 권장 크기: 한자·표기 20px, 후리가나 14–15px, 한국어 15–16px.
-- 행 최소 높이는 56px로 하고, 텍스트는 2줄까지 용인한다.
+- 행 높이를 일정하게 유지하고 텍스트는 한 줄 말줄임으로 표시한다. 긴 값은 셀을 눌러 하단 상세 시트에서 전체 내용을 확인한다.
 - 오프화이트 배경, 짙은 먹색 텍스트, 낮은 채도의 주색 한 개만 사용한다. 강한 테두리와 그라데이션은 사용하지 않는다.
 - 웹폰트 네트워크 의존성은 추가하지 않고 `system-ui`, `Yu Gothic`, `Hiragino Kaku Gothic ProN`, `Noto Sans JP`, `Apple SD Gothic Neo`, sans-serif 순의 시스템 스택을 사용한다.
 - 아이콘은 인라인 SVG 또는 CSS로 처리하고 아이콘 패키지를 추가하지 않는다.
@@ -88,8 +88,8 @@
 
 - 기존 스시 원본은 `data/sushi.json`, 메뉴별 확장 단어장은 `data/additional_catalogs.json`에서 관리한다.
 - 최상위 카탈로그는 메뉴 탭, 카탈로그 안의 카테고리는 세부 필터로 표시한다.
-- 런타임 HTTP 로딩 대신 `include_str!`로 WASM 번들에 포함한다. 데이터 변경은 재빌드를 통해 반영한다.
-- `serde` + `serde_json`으로 파싱하고, 같은 파서를 네이티브 단위 테스트에서도 사용한다.
+- 런타임 HTTP 로딩 대신 Vite의 정적 JSON import로 JavaScript 번들에 포함한다. 데이터 변경은 재빌드를 통해 반영한다.
+- TypeScript 도메인 타입으로 앱 경계를 검증하고, Node 내장 테스트에서 원본 JSON 계약을 별도로 검사한다.
 - JSON 순서가 화면 기본 순서이다. 별도 정렬은 사용자가 요청하기 전에 추가하지 않는다.
 
 ### 5.2 제안 스키마
@@ -163,15 +163,13 @@
 
 ### 6.1 스택
 
-- Rust stable + `wasm32-unknown-unknown`
-- Leptos `0.8` CSR 기능. 계획 작성 시 확인한 최신 docs.rs 베이스라인은 `0.8.20`이며, 실제 생성 시점의 현재 `0.8.x` 패치를 `Cargo.lock`으로 고정한다.
-- Trunk: 개발 서버, WASM 빌드, 정적 배포 번들
-- `serde`, `serde_json`: 메뉴 데이터 모델과 파싱
-- `gloo-storage`: 암기 상태 `localStorage` 저장
-- `console_error_panic_hook`: 개발 중 WASM panic 확인
-- Tailwind CSS 4: Trunk의 `tailwind-css` 자산 파이프라인, CSS-first 테마 토큰, utility class
+- SolidJS `1.9.x`: 세밀한 반응형 업데이트를 사용하는 CSR UI
+- TypeScript `7.x`: strict 모드의 도메인·컴포넌트 타입 검사
+- Vite `8.x` + `vite-plugin-solid`: 개발 서버와 프로덕션 정적 번들
+- 브라우저 `localStorage`: 기존 저장 키와 스키마를 유지한 암기 상태 저장
+- Tailwind CSS 4 + `@tailwindcss/vite`: CSS-first 테마 토큰과 utility class
 
-초기에는 `leptos_router`, 상태 관리 크레이트, 아이콘 패키지를 추가하지 않는다. Tailwind 커스텀 CSS는 테마, base rule, `visibility: hidden` 같이 utility로 표현하기 어려운 행동에만 사용한다.
+초기에는 라우터, 별도 상태 관리 패키지, 아이콘 패키지를 추가하지 않는다. Tailwind 커스텀 CSS는 테마, base rule, `visibility: hidden` 같이 utility로 표현하기 어려운 행동에만 사용한다.
 
 ### 6.2 렌더링 전략
 
@@ -179,7 +177,7 @@
 
 ### 6.3 상태 모델
 
-`StudyState`는 학습 화면의 단일 상태 진입점이다. Leptos `RwSignal`/파생 `Memo`를 사용하고 필요한 하위 컴포넌트에 context로 제공한다.
+`StudyState`는 학습 화면의 단일 상태 진입점이다. SolidJS `createSignal`과 파생 함수를 사용하고 필요한 하위 컴포넌트에 context로 제공한다.
 
 ```text
 StudyState
@@ -193,7 +191,7 @@ StudyState
 - 파생 목록과 진행률은 별도 원본 상태로 저장하지 않고 `Memo`로 계산한다.
 - 저장 키: `jp-menus.study.v1.sushi`.
 - 저장 값은 `schema_version` + `mastered_ids`로 구성한다. 파싱 실패 시 앱은 panic 대신 빈 상태로 시작하고 개발 로그를 남긴다.
-- 저장 I/O는 UI 컴포넌트에 직접 퍼뜨리지 않고 `storage.rs`로 격리한다.
+- 저장 I/O는 UI 컴포넌트에 직접 퍼뜨리지 않고 `storage.ts`로 격리한다.
 
 ## 7. 아키텍처와 폴더 구조
 
@@ -203,49 +201,48 @@ StudyState
 jp-menus/
 ├─ AGENTS.md
 ├─ plan.md
-├─ Cargo.toml
-├─ Cargo.lock
-├─ Trunk.toml
+├─ package.json
+├─ package-lock.json
+├─ tsconfig.json
+├─ vite.config.ts
 ├─ index.html
 ├─ data/
 │  └─ sushi.json
 ├─ public/
 │  └─ favicon.svg
 ├─ src/
-│  ├─ main.rs                 # 로깅/panic hook, mount만 수행
-│  ├─ lib.rs                  # App 공개, 테스트 가능한 모듈 루트
-│  ├─ app.rs                  # 앱 쉘과 context 조립
+│  ├─ main.tsx                # 스타일 import와 App mount만 수행
+│  ├─ app.tsx                 # 앱 쉘 진입점
 │  ├─ data/
-│  │  ├─ mod.rs
-│  │  └─ sushi.rs            # include_str!, 파싱, 데이터 공개
+│  │  └─ catalogs.ts         # 정적 JSON import와 카탈로그 조회
 │  ├─ features/
 │  │  └─ study/
-│  │     ├─ mod.rs
-│  │     ├─ model.rs          # MenuCatalog, Category, MenuItem, ID newtype
-│  │     ├─ state.rs          # StudyState, 필터, 토글, Memo
-│  │     ├─ storage.rs        # 암기 상태 복원/저장
-│  │     ├─ view.rs           # StudyPage 조립
+│  │     ├─ model.ts          # MenuCatalog, Category, MenuItem 타입
+│  │     ├─ state.ts          # StudyState, 필터, 토글, 파생 상태
+│  │     ├─ storage.ts        # 암기 상태 복원/저장
+│  │     ├─ view.tsx          # StudyPage 조립
 │  │     └─ components/
-│  │        ├─ mod.rs
-│  │        ├─ study_header.rs
-│  │        ├─ category_filter.rs
-│  │        ├─ menu_table.rs
-│  │        ├─ menu_row.rs
-│  │        └─ mastery_button.rs
-│  └─ shared/
-│     └─ a11y.rs              # 정말 재사용되는 보조 유틸만
+│  │        ├─ study-header.tsx
+│  │        ├─ category-filter.tsx
+│  │        ├─ menu-table.tsx
+│  │        ├─ menu-row.tsx
+│  │        ├─ mastery-button.tsx
+│  │        └─ cell-detail-sheet.tsx
 ├─ styles/
 │  └─ tailwind.css            # Tailwind import, CSS-first 테마, base/최소 커스텀 rule
+├─ scripts/
+│  ├─ serve-dist.mjs          # E2E용 정적 서버
+│  └─ run-e2e.mjs             # 정적 서버와 Playwright 생명주기 관리
 └─ tests/
-   ├─ data_contract.rs             # JSON 규칙·중복·최소 개수
-   └─ e2e/                         # Playwright 도입 시 생성
+   ├─ data-contract.test.mjs  # JSON 규칙·중복·최소 개수
+   └─ e2e/                    # Playwright 행동·레이아웃 테스트
 ```
 
 구조 원칙:
 
-- `main.rs`에 로직을 넣지 않는다.
+- `main.tsx`에 로직을 넣지 않는다.
 - 파싱된 메뉴 데이터는 불변 도메인 데이터로 다룬다.
-- UI 이벤트는 `StudyState`의 명시적인 메서드(`toggle_column`, `toggle_mastered`, `reset_progress`)를 호출한다.
+- UI 이벤트는 `StudyState`의 명시적인 메서드(`toggleColumn`, `toggleMastered`, `resetProgress`)를 호출한다.
 - 작은 컴포넌트에 조기 추상화를 만들지 않는다. 두 곳 이상에서 실제로 공유될 때만 `shared` 모듈로 옮긴다.
 - 새 가게 유형이 추가되기 전까지 라우터와 저장소 추상화를 미리 만들지 않는다.
 
@@ -253,14 +250,14 @@ jp-menus/
 
 ### Phase 0 — 프로젝트 스캐폴딩
 
-- [x] Rust stable, WASM target, Trunk 사용 가능 여부 확인
-- [x] Leptos CSR 프로젝트 생성
-- [x] `main.rs`/`lib.rs`/`app.rs`, Tailwind CSS 진입점, 기본 앱 캔버스 구성
-- [x] `trunk build --release` 성공과 정적 미리보기 확인
+- [x] Node.js, npm, Vite 사용 가능 여부 확인
+- [x] SolidJS + TypeScript CSR 프로젝트 구성
+- [x] `main.tsx`/`app.tsx`, Tailwind CSS 진입점, 기본 앱 캔버스 구성
+- [x] `npm run build` 성공과 정적 미리보기 확인
 
 ### Phase 1 — 데이터 계약과 스시 사전
 
-- [x] Rust 모델과 JSON 스키마 구현
+- [x] TypeScript 모델과 JSON 스키마 구현
 - [x] 16개 카테고리, 317개 항목 작성
 - [x] ID 유일성, 필수 문자열, 읽음 문자 규칙, 중복 항목 테스트
 - [x] 중복/별칭/희귀 한자/어종 번역 1차 검수
@@ -283,7 +280,7 @@ jp-menus/
 
 ### Phase 4 — 검증과 배포 준비
 
-- [x] 포맷, Clippy, 네이티브 단위 테스트, WASM 빌드 통과
+- [x] TypeScript 검사, 데이터 계약 테스트, Vite production 빌드 통과
 - [x] 320px, 375px, 430px, 480px, 1440px 뷰포트 자동/시각 확인
 - [x] 스티키 헤더, 열 숨김, dim, 저장 복원 E2E 검증
 - [x] release 빌드 후 `dist/`를 로컬 정적 호스트에서 확인
@@ -297,19 +294,25 @@ jp-menus/
 - [x] 전체 카탈로그 수량·ID·필수 필드 계약 테스트 추가
 - [x] 필터 결과를 60개 단위로 점진 렌더링하는 무한 스크롤 추가
 
+### Phase 6 — SolidJS 마이그레이션
+
+- [x] Leptos/WASM 런타임을 SolidJS + TypeScript CSR로 교체
+- [x] 기존 localStorage 키·스키마와 1,576개 영구 ID 호환 유지
+- [x] Vite + Tailwind CSS 4 빌드 및 GitHub Pages 워크플로 전환
+- [x] 데이터 계약 테스트를 Node 테스트로 이전
+- [x] 기존 Playwright 행동·레이아웃 회귀 테스트 전체 통과
+
 ## 9. 테스트 전략
 
 ### 9.1 정적 검사
 
 ```powershell
-cargo fmt --all -- --check
-cargo clippy --all-targets --all-features -- -D warnings
-cargo test --all
-cargo check --target wasm32-unknown-unknown
-trunk build --release
+npm run check
+npm run build
+npm run test:e2e
 ```
 
-실제 스캐폴딩 후 생성된 `Cargo.toml`과 툴체인에 맞게 명령을 확정한다. 실행하지 않은 명령을 README에 성공한 것처럼 기록하지 않는다.
+실제 `package.json`과 잠금 파일에 맞는 명령을 유지한다. 실행하지 않은 명령을 README에 성공한 것처럼 기록하지 않는다.
 
 ### 9.2 데이터 계약 테스트
 
@@ -334,7 +337,7 @@ trunk build --release
 
 ## 10. 완료 기준
 
-- Leptos CSR 앱이 `trunk serve`와 release 빌드에서 정상 작동한다.
+- SolidJS CSR 앱이 `npm run dev`와 Vite production 빌드에서 정상 작동한다.
 - 기존 스시 317개와 확장 단어 1,259개가 내장 JSON에 있고 12개 메뉴 탭에서 선택할 수 있다.
 - 320–480px에서 가로 오버플로가 없고, 데스크톱에서는 480px 이하 캔버스가 가운데 있다.
 - 스크롤 중 컬럼 헤더가 고정되며 각 헤더로 해당 열을 가릴 수 있다.
@@ -342,7 +345,7 @@ trunk build --release
 - 암기 버튼이 문자 영역을 침범하지 않고, dim 상태를 즉시 토글할 수 있다.
 - 암기 상태는 새로고침 후에도 복원되고, 컬럼 가리기는 초기화된다.
 - 터치, 키보드, 포커스, 스크린리더 상태가 명확하다.
-- 데이터 계약 테스트와 Rust 정적 검사, release 빌드가 통과한다.
+- 데이터 계약 테스트와 TypeScript 정적 검사, production 빌드가 통과한다.
 
 ## 11. 후속 확장 후보
 
@@ -359,8 +362,6 @@ trunk build --release
 ## 12. 결정 근거
 
 - Codex는 프로젝트 지침으로 `AGENTS.md`를 읽고, 프로젝트 루트에서 현재 작업 디렉터리까지 계층적으로 탐색한다: <https://learn.chatgpt.com/docs/agent-configuration/agents-md>
-- Leptos 공식 Book은 서버/API가 필요 없는 SPA에 CSR + Trunk를 간단하고 배포 선택지가 많은 경로로 안내한다: <https://book.leptos.dev/getting_started/index.html>
-- Leptos 공식 CSR 템플릿도 Trunk 개발·release 빌드 흐름을 사용한다: <https://github.com/leptos-rs/start-trunk>
-- Leptos 0.8 context API는 하위 반응형 범위에 상태를 공유하는 `provide_context`/`use_context`를 제공한다: <https://docs.rs/leptos/latest/leptos/context/index.html>
-- Leptos Book은 브라우저 API처럼 반응형 세계 밖의 값과 동기화할 때 effect를 사용하는 패턴을 설명한다: <https://book.leptos.dev/reactivity/14_create_effect.html>
-- CSR release 빌드는 `dist/`를 정적 호스팅하는 방식이다: <https://book.leptos.dev/deployment/csr.html>
+- SolidJS는 signals와 context를 사용해 컴포넌트별로 세밀하게 반응형 UI를 갱신한다: <https://docs.solidjs.com/concepts/signals>
+- Vite production 빌드는 기존 Trunk 개발 프로세스와 충돌하지 않는 `solid-dist/`에 정적 호스팅 가능한 결과를 생성한다: <https://vite.dev/guide/build>
+- Tailwind CSS 4의 Vite 플러그인은 Vite 파이프라인에서 CSS를 직접 처리한다: <https://tailwindcss.com/docs/installation/using-vite>
