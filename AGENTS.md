@@ -62,6 +62,7 @@ Codex uses `AGENTS.md` for repository instructions. This is the equivalent proje
 - Keep column-header toggle labels visible and expose toggle state with `aria-pressed` and a visible state cue.
 - Touch targets should be at least 44×44px even if the visible icon is smaller.
 - Provide strong `:focus-visible` styles and support `prefers-reduced-motion`.
+- Make the full value in the cell-detail bottom sheet a keyboard- and touch-operable copy control with immediate accessible feedback and a Clipboard API fallback.
 - Verify 320px, 375px, 430px, 480px, and a wide desktop viewport. There must be no horizontal page overflow at mobile widths.
 - Do not fetch webfonts for the MVP. Use the system Japanese/Korean font stack specified in `plan.md`.
 

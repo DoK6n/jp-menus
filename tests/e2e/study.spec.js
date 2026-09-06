@@ -238,6 +238,21 @@ test('long cells stay on one line and expose their full value on tap', async ({ 
   await expect(dialog).toBeVisible();
   await expect(dialog.getByText('フィラデルフィアロール', { exact: true })).toBeVisible();
 
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        writeText(value) {
+          window.__copiedMenuValue = value;
+          return Promise.resolve();
+        },
+      },
+    });
+  });
+  await dialog.getByRole('button', { name: 'フィラデルフィアロール 복사' }).click();
+  await expect(dialog.getByRole('button', { name: 'フィラデルフィアロール 복사' })).toContainText('복사됨');
+  expect(await page.evaluate(() => window.__copiedMenuValue)).toBe('フィラデルフィアロール');
+
   await dialog.getByRole('button', { name: '닫기' }).click();
   await expect(dialog).toHaveCount(0);
 });
