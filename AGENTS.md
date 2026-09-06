@@ -2,7 +2,7 @@
 
 ## Project overview
 
-This repository is for **JP Menus**, a mobile-first Leptos web app for memorizing Japanese restaurant menu vocabulary. The first catalog is sushi restaurant terminology. Read `plan.md` before implementation or architectural changes; it is the product and acceptance-criteria source of truth.
+This repository is for **JP Menus**, a mobile-first SolidJS web app for memorizing Japanese restaurant menu vocabulary. The first catalog is sushi restaurant terminology. Read `plan.md` before implementation or architectural changes; it is the product and acceptance-criteria source of truth.
 
 Codex uses `AGENTS.md` for repository instructions. This is the equivalent project-level role that `CLAUDE.md` commonly fills in Claude Code.
 
@@ -10,7 +10,7 @@ Codex uses `AGENTS.md` for repository instructions. This is the equivalent proje
 
 - The first complete sushi-learning MVP is implemented.
 - The embedded catalog contains 317 items across 16 categories.
-- Rust checks, the WASM build, the Tailwind release bundle, and Playwright interaction tests are configured and passing.
+- TypeScript checks, the Vite production build, data contract tests, and Playwright interaction tests are configured and passing.
 - Keep `plan.md` and this file aligned when product or architecture decisions change.
 
 ## Product invariants
@@ -28,13 +28,13 @@ Codex uses `AGENTS.md` for repository instructions. This is the equivalent proje
 
 ## Technical baseline
 
-- Rust stable, compiling to `wasm32-unknown-unknown`.
-- Leptos 0.8 CSR with Trunk. Use the current compatible 0.8 patch and commit `Cargo.lock`.
-- Use `serde`/`serde_json` for catalog data and `gloo-storage` for progress persistence.
-- Use Tailwind CSS 4 through Trunk's built-in `tailwind-css` asset pipeline. Keep custom CSS limited to theme tokens, base rules, and behavior that utilities cannot express clearly. Do not introduce a component framework, an icon dependency, a router, SSR, or a backend without a concrete requirement and explicit update to `plan.md`.
-- Keep `main.rs` limited to startup concerns and mounting `App`.
+- SolidJS CSR with strict TypeScript, built by Vite. Commit `package-lock.json`.
+- Use Solid signals, memos, and context for application state; do not add a state library without a concrete need.
+- Import catalog JSON statically so startup is deterministic and requires no runtime request.
+- Use browser `localStorage` through `storage.ts` for progress persistence while preserving the released storage key and schema.
+- Use Tailwind CSS 4 through `@tailwindcss/vite`. Keep custom CSS limited to theme tokens, base rules, and behavior that utilities cannot express clearly. Do not introduce a component framework, an icon dependency, a router, SSR, or a backend without a concrete requirement and explicit update to `plan.md`.
+- Keep `main.tsx` limited to styles, startup validation, and mounting `App`.
 - Prefer feature-first modules under `src/features/study/`; keep shared abstractions thin and earned by actual reuse.
-- Keep source catalog data in `data/sushi.json` and embed it with `include_str!` for deterministic startup.
 
 ## Data rules
 
@@ -49,9 +49,9 @@ Codex uses `AGENTS.md` for repository instructions. This is the equivalent proje
 
 ## State boundaries
 
-- `StudyState` owns interactive page state and exposes intention-revealing operations such as `toggle_column`, `toggle_mastered`, and `reset_progress`.
-- Use derived signals/memos for filtered rows and counts; do not duplicate derived values in writable state.
-- Isolate local-storage serialization and error handling in `storage.rs`, not individual view components.
+- `StudyState` owns interactive page state and exposes intention-revealing operations such as `toggleColumn`, `toggleMastered`, and `resetProgress`.
+- Use derived functions/memos for filtered rows and counts; do not duplicate derived values in writable state.
+- Isolate local-storage serialization and error handling in `storage.ts`, not individual view components.
 - Persist only durable study progress by default. Search text, selected filters, and concealed columns are session UI state unless `plan.md` is deliberately revised.
 
 ## UI and accessibility rules
@@ -68,14 +68,14 @@ Codex uses `AGENTS.md` for repository instructions. This is the equivalent proje
 
 Follow the proposed tree in `plan.md`. Important boundaries are:
 
-- `src/app.rs`: app shell and context composition.
-- `src/data/sushi.rs`: compile-time catalog embedding and parsing.
-- `src/features/study/model.rs`: serializable domain types.
-- `src/features/study/state.rs`: reactive state and derived values.
-- `src/features/study/storage.rs`: persistence adapter.
+- `src/app.tsx`: app shell entry point.
+- `src/data/catalogs.ts`: static catalog imports and lookup helpers.
+- `src/features/study/model.ts`: domain types.
+- `src/features/study/state.ts`: reactive state, context, and derived values.
+- `src/features/study/storage.ts`: persistence adapter.
 - `src/features/study/components/`: focused UI components.
 - `styles/tailwind.css`: Tailwind entry point, theme tokens, base rules, and small custom behavior rules.
-- `tests/data_contract.rs`: catalog integrity tests.
+- `tests/data-contract.test.mjs`: catalog integrity tests.
 
 Do not create empty placeholder modules solely to match the full tree. Add a file when its phase is being implemented.
 
@@ -93,21 +93,19 @@ Do not create empty placeholder modules solely to match the full tree. Add a fil
 Once the project is scaffolded, the intended baseline is:
 
 ```powershell
-cargo fmt --all -- --check
-cargo clippy --all-targets --all-features -- -D warnings
-cargo test --all
-cargo check --target wasm32-unknown-unknown
-trunk build --release
+npm run check
+npm run build
+npm run test:e2e
 ```
 
-Use `trunk serve` for manual UI verification. If the actual manifest or platform requires an adjusted command, use the working command and update this section. Never claim an unexecuted command passed.
+Use `npm run dev` for manual UI verification. Never claim an unexecuted command passed.
 
 For behavior affecting layout or interaction, verify in a real browser at the target viewports. Unit tests alone are not sufficient for sticky positioning, preserved column geometry, touch targets, focus, or local-storage restoration.
 
 ## Change discipline
 
 - Keep dependencies minimal and explain any new production dependency in the change summary.
-- Keep Rust warnings clean; do not broadly suppress Clippy or compiler warnings.
-- Avoid `unwrap`/`expect` for user-controlled or persisted data. Static embedded catalog failure may surface clearly during development, but contract tests should catch it before release.
+- Keep TypeScript strict-mode errors clean; do not broadly suppress the compiler.
+- Treat user-controlled or persisted data defensively. Static catalog failures may surface clearly during development, but contract tests should catch them before release.
 - Do not silently rewrite Japanese readings or Korean meanings during unrelated code work.
 - If implementation reveals that a product invariant is infeasible, document the evidence and revise `plan.md` before changing the behavior.

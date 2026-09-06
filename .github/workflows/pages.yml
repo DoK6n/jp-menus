@@ -21,14 +21,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Install Rust WASM target
-        run: rustup target add wasm32-unknown-unknown
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
 
-      - name: Install Trunk
-        run: cargo install --locked trunk --version 0.21.14
+      - name: Install dependencies
+        run: npm ci
 
       - name: Build
-        run: trunk build --release --public-url /jp-menus/
+        run: npm run build
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
@@ -36,7 +39,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: dist
+          path: solid-dist
 
   deploy:
     environment:

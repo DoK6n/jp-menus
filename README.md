@@ -1,35 +1,34 @@
 # JP Menus
 
-일본 식당과 여행 현장에서 자주 보는 일본어 표기, 읽기, 한국어 뜻을 외우는 모바일 학습 앱입니다. 12개 메뉴 탭에 1,576개 단어가 수록되어 있으며 Leptos CSR, Tailwind CSS 4, Trunk로 구성됩니다.
+일본 식당과 여행 현장에서 자주 보는 일본어 표기, 읽기, 한국어 뜻을 외우는 모바일 학습 앱입니다. 12개 메뉴 탭에 1,576개 단어가 수록되어 있으며 SolidJS, TypeScript, Vite, Tailwind CSS 4로 구성됩니다.
 
 배포 주소: <https://dok6n.github.io/jp-menus/>
 
 ## 준비
 
 ```powershell
-rustup target add wasm32-unknown-unknown
-cargo install --locked trunk
+npm install
 ```
 
 ## 개발
 
 ```powershell
-trunk serve
+npm run dev
 ```
 
-`http://127.0.0.1:3000`에서 확인할 수 있습니다. Trunk가 Tailwind CSS를 함께 빌드합니다.
+Vite가 출력한 로컬 주소에서 확인할 수 있습니다.
 
 ## 검증
 
 ```powershell
-cargo fmt --all -- --check
-cargo clippy --all-targets --all-features -- -D warnings
-cargo test --all
-cargo check --target wasm32-unknown-unknown
-trunk build --release
-npm install
+npm run check
+npm run build
 npm run test:e2e
 ```
+
+- `npm run check`: TypeScript 검사와 데이터 계약 테스트
+- `npm run build`: 프로덕션 정적 번들 생성
+- `npm run test:e2e`: 프로덕션 빌드 후 Playwright 행동·레이아웃 테스트
 
 ## 데이터 편집
 
