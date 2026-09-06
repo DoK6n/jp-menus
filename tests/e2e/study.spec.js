@@ -35,6 +35,7 @@ test('desktop keeps the mobile canvas centered', async ({ page }) => {
 });
 
 test('column concealment preserves geometry and the sticky header', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.setViewportSize({ width: 375, height: 900 });
   const term = page.getByText('握り', { exact: true });
   const cell = term.locator('xpath=ancestor::td');
@@ -45,6 +46,7 @@ test('column concealment preserves geometry and the sticky header', async ({ pag
   await page.getByRole('button', { name: '한자·표기 열 가리기' }).click();
   await expect(page.getByRole('button', { name: '한자·표기 열 보이기' })).toHaveAttribute('aria-pressed', 'true');
   await expect(term).toHaveCSS('visibility', 'hidden');
+  await expect(term).toHaveCSS('transition-property', 'none');
 
   const afterCell = await cell.boundingBox();
   const afterRow = await row.boundingBox();
@@ -63,6 +65,10 @@ test('column concealment preserves geometry and the sticky header', async ({ pag
   await page.waitForTimeout(100);
   const header = await page.getByRole('button', { name: '한자·표기 열 보이기' }).boundingBox();
   expect(header.y).toBeLessThanOrEqual(1);
+
+  await page.getByRole('button', { name: '한자·표기 열 보이기' }).click();
+  await expect(page.getByRole('button', { name: '한자·표기 열 가리기' })).toHaveAttribute('aria-pressed', 'false');
+  await expect(term).toHaveCSS('visibility', 'visible');
 });
 
 test('menu rows render in batches and load more near the bottom', async ({ page }) => {

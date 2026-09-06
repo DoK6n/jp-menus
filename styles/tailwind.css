@@ -114,6 +114,11 @@
     user-select: none;
   }
 
+  .cell-content {
+    visibility: visible;
+    transition: none !important;
+  }
+
   .scrollbar-none {
     scrollbar-width: none;
   }
