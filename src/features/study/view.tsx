@@ -1,6 +1,6 @@
-import { For } from "solid-js";
+import { For, Show } from "solid-js";
 
-import { catalogById } from "../../data/catalogs";
+import { catalogById, kanjiLibrary } from "../../data/catalogs";
 import type { MenuCatalog } from "./model";
 import { createPullToRefresh } from "./pull-to-refresh";
 import { createStudyState, StudyContext, useStudyState } from "./state";
@@ -42,13 +42,42 @@ export function StudyPage(props: StudyPageProps) {
           phase={pullToRefresh.phase()}
           threshold={pullToRefresh.threshold}
         />
-        <StudyHeader library={props.library} />
-        <MenuTabs library={props.library} />
+        <StudyScreenNavigation />
+        <StudyHeader library={state.selectedScreen() === "kanji" ? kanjiLibrary : props.library} />
+        <Show when={state.selectedScreen() === "menus"}>
+          <MenuTabs library={props.library} />
+        </Show>
         <CategoryFilter />
         <MenuTable />
         <CellDetailSheet />
       </main>
     </StudyContext.Provider>
+  );
+}
+
+function StudyScreenNavigation() {
+  const state = useStudyState();
+
+  return (
+    <nav aria-label="학습 화면" class="px-4 pt-[max(1rem,env(safe-area-inset-top))] sm:px-5">
+      <div class="grid grid-cols-2 gap-1 rounded-xl bg-paper p-1">
+        <For each={[
+          { id: "menus", label: "메뉴 단어" },
+          { id: "kanji", label: "상용한자" },
+        ] as const}>
+          {(screen) => (
+            <button
+              type="button"
+              onClick={() => state.selectScreen(screen.id)}
+              aria-pressed={state.selectedScreen() === screen.id}
+              class="min-h-11 rounded-lg text-sm font-bold text-muted outline-none aria-pressed:bg-surface aria-pressed:text-accent aria-pressed:shadow-sm focus-visible:ring-2 focus-visible:ring-accent"
+            >
+              {screen.label}
+            </button>
+          )}
+        </For>
+      </div>
+    </nav>
   );
 }
 

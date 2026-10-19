@@ -1,4 +1,4 @@
-import { createSignal, onCleanup, Show } from "solid-js";
+import { createSignal, onCleanup, onMount, Show } from "solid-js";
 
 import type { CellDetail } from "../model";
 import { useStudyState } from "../state";
@@ -15,6 +15,7 @@ async function copyToClipboard(value: string): Promise<boolean> {
     // Fall through for browsers or installed web apps that deny Clipboard API access.
   }
 
+  const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
   const textArea = document.createElement("textarea");
   textArea.value = value;
   textArea.setAttribute("readonly", "");
@@ -31,6 +32,7 @@ async function copyToClipboard(value: string): Promise<boolean> {
     return false;
   } finally {
     textArea.remove();
+    if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
   }
 }
 
@@ -46,7 +48,31 @@ export function CellDetailSheet() {
 
 function CellDetailContent(props: { detail: CellDetail; onClose: () => void }) {
   const [copyState, setCopyState] = createSignal<CopyState>("idle");
+  const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
+  let dialog: HTMLElement | undefined;
+  let copyButton: HTMLButtonElement | undefined;
   let resetTimer: number | undefined;
+
+  onMount(() => copyButton?.focus());
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      props.onClose();
+    } else if (event.key === "Tab") {
+      const buttons = dialog?.querySelectorAll<HTMLButtonElement>("button");
+      if (!buttons?.length) return;
+      const first = buttons[0];
+      const last = buttons[buttons.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
+    }
+  };
 
   const handleCopy = async () => {
     const copied = await copyToClipboard(props.detail.value);
@@ -57,6 +83,7 @@ function CellDetailContent(props: { detail: CellDetail; onClose: () => void }) {
 
   onCleanup(() => {
     if (resetTimer !== undefined) window.clearTimeout(resetTimer);
+    previousFocus?.focus({ preventScroll: true });
   });
 
   const copyLabel = () => {
@@ -74,10 +101,12 @@ function CellDetailContent(props: { detail: CellDetail; onClose: () => void }) {
         onClick={props.onClose}
       />
       <section
+        ref={dialog}
         role="dialog"
         aria-modal="true"
         aria-labelledby="cell-detail-title"
-        class="relative z-10 w-full rounded-t-[28px] bg-surface px-5 pt-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-[0_-16px_40px_rgba(32,32,30,0.16)]"
+        onKeyDown={handleKeyDown}
+        class="relative z-10 max-h-[85dvh] w-full overflow-y-auto rounded-t-[28px] bg-surface px-5 pt-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-[0_-16px_40px_rgba(32,32,30,0.16)]"
       >
         <div class="flex items-center justify-between gap-4">
           <p
@@ -105,12 +134,13 @@ function CellDetailContent(props: { detail: CellDetail; onClose: () => void }) {
           </button>
         </div>
         <button
+          ref={copyButton}
           type="button"
           class="group mt-3 flex min-h-14 w-full items-start justify-between gap-3 rounded-xl px-2 py-2 text-left outline-none transition-colors hover:bg-paper active:bg-accent-soft focus-visible:ring-2 focus-visible:ring-accent"
           aria-label={`${props.detail.value} 복사`}
           onClick={handleCopy}
         >
-          <span class="text-[24px] leading-[1.45] font-bold tracking-[-0.025em] break-keep text-ink">
+          <span class="min-w-0 text-[24px] leading-[1.45] font-bold tracking-[-0.025em] [overflow-wrap:anywhere] text-ink">
             {props.detail.value}
           </span>
           <span

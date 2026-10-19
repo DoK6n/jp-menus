@@ -1,13 +1,21 @@
-import { For, Show } from "solid-js";
+import { createMemo, For, Show } from "solid-js";
 
 import { catalogById } from "../../../data/catalogs";
 import type { StudyColumn } from "../model";
+import { studyColumnLabels } from "../model";
 import { useStudyState } from "../state";
 import { MenuRow } from "./menu-row";
 
 export function MenuTable() {
   const state = useStudyState();
+  const isKanji = () => state.selectedScreen() === "kanji";
+  const labels = () => studyColumnLabels[state.selectedScreen()];
   const catalog = () => catalogById(state.selectedCatalog());
+  const filteredGroups = createMemo(() => {
+    const current = catalog();
+    return current ? state.filteredGroups(current) : [];
+  });
+  const filteredCount = () => filteredGroups().reduce((total, group) => total + group.items.length, 0);
   const groups = () => {
     const current = catalog();
     return current ? state.visibleFilteredGroups(current) : [];
@@ -22,25 +30,36 @@ export function MenuTable() {
   };
 
   return (
-    <section aria-label="일본 메뉴 단어" class="pb-[env(safe-area-inset-bottom)]">
+    <section aria-label={isKanji() ? "일본 상용한자" : "일본 메뉴 단어"} class="pb-[env(safe-area-inset-bottom)]">
+      <Show when={isKanji()}>
+        <details class="border-b border-line px-4 text-xs leading-5 text-muted sm:px-5">
+          <summary class="flex min-h-11 cursor-pointer items-center justify-between gap-2 rounded outline-none focus-visible:ring-2 focus-visible:ring-accent">
+            <span class="font-semibold">한자 자료 안내 <span aria-hidden="true">＋</span></span>
+            <span>{filteredCount().toLocaleString("ko-KR")}자</span>
+          </summary>
+          <p class="pb-2">2010년 상용한자 2,136자를 학년별로 나눴어요. 읽기는 KANJIDIC2의 사전 음독·훈독이며, 공식 상용한자표 밖의 읽기도 포함될 수 있어요.</p>
+          <p class="pb-2">한국어는 한자 훈음 중심이며, 일본어 단어에서의 뜻과 다를 수 있어요. 긴 읽기나 뜻은 셀을 눌러 확인하세요.</p>
+          <a class="mb-2 inline-flex min-h-11 items-center rounded font-semibold text-accent underline underline-offset-4 outline-none focus-visible:ring-2 focus-visible:ring-accent" href={`${import.meta.env.BASE_URL}joyo-sources.html`} target="_blank" rel="noreferrer">데이터 출처·이용 조건</a>
+        </details>
+      </Show>
       <p class="border-b border-line bg-surface px-4 py-2.5 text-xs leading-5 text-muted sm:px-5">
         열 제목을 누르면 답을 가릴 수 있어요.
       </p>
       <table class="w-full table-fixed border-collapse">
         <caption class="sr-only">
-          일본 메뉴의 일본어 표기, 후리가나, 한국어 뜻 학습표
+          {isKanji() ? "일본 상용한자의 한자, 음독·훈독, 한국어 뜻 학습표" : "일본 메뉴의 일본어 표기, 후리가나, 한국어 뜻 학습표"}
         </caption>
         <colgroup>
-          <col class="w-[31%]" />
-          <col class="w-[27%]" />
+          <col class={isKanji() ? "w-[21%]" : "w-[31%]"} />
+          <col class={isKanji() ? "w-[39%]" : "w-[27%]"} />
           <col />
           <col class="w-11" />
         </colgroup>
         <thead>
           <tr class="text-left">
-            <StudyColumnHeader label="한자·표기" column="term" />
-            <StudyColumnHeader label="후리가나" column="reading" />
-            <StudyColumnHeader label="한국어 뜻" column="meaning" />
+            <StudyColumnHeader label={labels().term} column="term" />
+            <StudyColumnHeader label={labels().reading} column="reading" />
+            <StudyColumnHeader label={labels().meaning} column="meaning" />
             <th
               scope="col"
               class="sticky top-0 z-20 h-12 w-11 border-b border-line bg-paper"
@@ -63,7 +82,7 @@ export function MenuTable() {
                   </span>
                   <span class="ml-2 text-xs font-bold text-muted">{group.label_ko}</span>
                   <span class="ml-1.5 text-[10px] font-semibold text-muted/60">
-                    {group.items.length}
+                    {filteredGroups().find((category) => category.id === group.id)?.items.length ?? 0}
                   </span>
                 </th>
               </tr>

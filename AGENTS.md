@@ -2,14 +2,15 @@
 
 ## Project overview
 
-This repository is for **JP Menus**, a mobile-first SolidJS web app for memorizing Japanese restaurant menu vocabulary. The first catalog is sushi restaurant terminology. Read `plan.md` before implementation or architectural changes; it is the product and acceptance-criteria source of truth.
+This repository is for **JP Menus**, a mobile-first SolidJS web app for memorizing Japanese restaurant menu vocabulary and the 2,136 Joyo kanji. The first catalog is sushi restaurant terminology. Read `plan.md` before implementation or architectural changes; it is the product and acceptance-criteria source of truth.
 
 Codex uses `AGENTS.md` for repository instructions. This is the equivalent project-level role that `CLAUDE.md` commonly fills in Claude Code.
 
 ## Current status
 
 - The first complete sushi-learning MVP is implemented.
-- The embedded catalog contains 317 items across 16 categories.
+- The menu library contains 1,576 items across 12 catalogs, including 317 sushi items across 16 categories.
+- A separate Joyo kanji screen contains 2,136 characters in seven school-grade groups, with dictionary readings and Korean meanings.
 - TypeScript checks, the Vite production build, data contract tests, and Playwright interaction tests are configured and passing.
 - Keep `plan.md` and this file aligned when product or architecture decisions change.
 
@@ -24,6 +25,7 @@ Codex uses `AGENTS.md` for repository instructions. This is the equivalent proje
 - The mastery control has its own fixed-width cell and must never overlap vocabulary text.
 - A mastered row is dimmed in place, remains reversible, and keeps its original order.
 - Persist mastered item IDs in browser local storage. A missing or malformed stored value must not prevent startup.
+- Keep menu and kanji progress summaries and resets scoped to their own screen while preserving the released storage key/schema and existing IDs.
 - Optimize for calm, legible study. Avoid decorative clutter, aggressive animation, gradients, and unrelated dashboard widgets.
 - Preserve keyboard and screen-reader operation as well as touch operation.
 
@@ -47,6 +49,8 @@ Codex uses `AGENTS.md` for repository instructions. This is the equivalent proje
 - Distinguish fish species, cuts, preparation methods, and dish formats. Use `note_ko` when Korean common names are ambiguous.
 - Maintain at least 15 categories and 250 unique items for the initial complete catalog.
 - Every catalog change must pass parsing, required-field, enum, minimum-count, and ID-uniqueness tests.
+- Keep `data/joyo_kanji.json` at exactly 2,136 unique characters; grade counts are 80, 160, 200, 202, 193, 191, and 1,110. Kanji IDs are `joyo-u` plus the lowercase hexadecimal code point.
+- Preserve the kanji source/license notices in `data/joyo-sources.md` and `public/joyo-sources.html`. Dictionary readings may exceed official Joyo readings; the screen must disclose this distinction.
 
 ## State boundaries
 

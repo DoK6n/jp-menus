@@ -5,8 +5,9 @@ import type {
   DisplayGroup,
   MenuCatalog,
   StudyColumn,
+  StudyScreen,
 } from "./model";
-import { clearProgress, loadMasteredIds, saveMasteredIds } from "./storage";
+import { loadMasteredIds, saveMasteredIds } from "./storage";
 
 const PAGE_SIZE = 60;
 
@@ -25,7 +26,9 @@ function itemMatchesQuery(
 export function createStudyState() {
   const [hiddenColumns, setHiddenColumns] = createSignal<Set<StudyColumn>>(new Set());
   const [masteredIds, setMasteredIds] = createSignal<Set<string>>(loadMasteredIds());
-  const [selectedCatalog, setSelectedCatalog] = createSignal("sushi");
+  const [selectedScreen, setSelectedScreen] = createSignal<StudyScreen>("menus");
+  const [selectedMenuCatalog, setSelectedMenuCatalog] = createSignal("sushi");
+  const selectedCatalog = () => selectedScreen() === "kanji" ? "joyo-kanji" : selectedMenuCatalog();
   const [selectedCategory, setSelectedCategory] = createSignal<string>();
   const [query, setQueryValue] = createSignal("");
   const [hideMastered, setHideMastered] = createSignal(false);
@@ -57,6 +60,7 @@ export function createStudyState() {
     hiddenColumns,
     masteredIds,
     selectedCatalog,
+    selectedScreen,
     selectedCategory,
     query,
     hideMastered,
@@ -103,9 +107,22 @@ export function createStudyState() {
       );
     },
 
+    selectScreen(screen: StudyScreen) {
+      if (screen === selectedScreen()) return;
+      batch(() => {
+        setSelectedScreen(screen);
+        setSelectedCategory(undefined);
+        setQueryValue("");
+        setHideMastered(false);
+        setHiddenColumns(new Set<StudyColumn>());
+        setCellDetail(undefined);
+        resetVisibleItems();
+      });
+    },
+
     selectCatalog(id: string) {
       batch(() => {
-        setSelectedCatalog(id);
+        setSelectedMenuCatalog(id);
         setSelectedCategory(undefined);
         resetVisibleItems();
       });
@@ -140,9 +157,13 @@ export function createStudyState() {
       setCellDetail(undefined);
     },
 
-    resetProgress() {
-      setMasteredIds(new Set<string>());
-      clearProgress();
+    resetProgress(library: MenuCatalog[]) {
+      const idsToReset = new Set(library.flatMap((catalog) =>
+        catalog.categories.flatMap((category) => category.items.map((item) => item.id)),
+      ));
+      const remaining = new Set([...masteredIds()].filter((id) => !idsToReset.has(id)));
+      setMasteredIds(remaining);
+      saveMasteredIds(remaining);
     },
 
     filteredGroups,

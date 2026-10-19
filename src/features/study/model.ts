@@ -4,6 +4,8 @@ export interface MenuItem {
   id: string;
   term: string;
   reading: string;
+  reading_on?: string[];
+  reading_kun?: string[];
   meaning_ko: string;
   aliases?: string[];
   note_ko?: string;
@@ -35,3 +37,10 @@ export interface CellDetail {
 }
 
 export type StudyColumn = "term" | "reading" | "meaning";
+
+export type StudyScreen = "menus" | "kanji";
+
+export const studyColumnLabels: Record<StudyScreen, Record<StudyColumn, string>> = {
+  menus: { term: "한자·표기", reading: "후리가나", meaning: "한국어 뜻" },
+  kanji: { term: "한자", reading: "음독·훈독", meaning: "한국어 뜻" },
+};

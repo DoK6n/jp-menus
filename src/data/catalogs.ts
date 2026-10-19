@@ -1,5 +1,6 @@
 import additionalCatalogsJson from "../../data/additional_catalogs.json";
 import sushiCatalogJson from "../../data/sushi.json";
+import joyoKanjiJson from "../../data/joyo_kanji.json";
 
 import type { MenuCatalog } from "../features/study/model";
 
@@ -14,8 +15,10 @@ export const menuLibrary: MenuCatalog[] = [
   ...(additionalCatalogsJson as MenuCatalog[]),
 ];
 
+export const kanjiLibrary: MenuCatalog[] = [joyoKanjiJson as MenuCatalog];
+
 export function catalogById(id: string): MenuCatalog | undefined {
-  return menuLibrary.find((catalog) => catalog.venue_type === id);
+  return [...menuLibrary, ...kanjiLibrary].find((catalog) => catalog.venue_type === id);
 }
 
 export function catalogItemCount(catalog: MenuCatalog): number {

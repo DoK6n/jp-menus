@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>상용한자 자료 · JP Menus</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, "Yu Gothic", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Apple SD Gothic Neo", sans-serif; color: #292c2a; background: #faf9f6; }
+    * { box-sizing: border-box; }
+    body { margin: 0 auto; max-width: 480px; padding: 24px 20px 48px; line-height: 1.7; overflow-wrap: anywhere; }
+    h1 { font-size: 1.5rem; margin-top: 24px; }
+    h2 { font-size: 1.1rem; margin-top: 32px; }
+    p, li { font-size: .94rem; }
+    a { color: #345c50; text-underline-offset: 3px; }
+    a:focus-visible, summary:focus-visible { outline: 3px solid #356c58; outline-offset: 4px; }
+    .back { display: inline-flex; align-items: center; min-height: 44px; }
+    ul { padding-left: 22px; }
+    details { margin-top: 16px; border-top: 1px solid #dbded8; padding-top: 8px; }
+    summary { cursor: pointer; min-height: 44px; display: list-item; padding: 8px 0; }
+    pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: .8rem; font-family: inherit; }
+    .muted { color: #5d655f; }
+  </style>
+</head>
+<body>
+  <a class="back" href="./">← 학습 화면으로</a>
+  <main>
+    <h1>상용한자 자료 안내</h1>
+    <p>일본 상용한자 <strong>2,136자</strong>를 초등 1~6학년과 중학교 이상으로 나눴습니다. 글자 범위는 <a href="https://www.bunka.go.jp/kokugo_nihongo/sisaku/joho/joho/kijun/naikaku/kanji/">문화청의 2010년 상용한자표</a>를 따릅니다.</p>
+    <p>일본어 읽기는 <strong>KANJIDIC2 사전의 음독·훈독</strong>입니다. 공식 상용한자표의 읽기만으로 제한하지 않아 드물거나 옛 읽기도 포함될 수 있습니다. 음독도 히라가나로 표시하며 인명 읽기는 제외했습니다.</p>
+    <p>한국어는 <strong>한국 한자의 훈음 중심</strong>입니다. 일본어 단어에서의 뜻과 다를 수 있습니다. 일본 고유 의미가 필요한 일부 글자는 사전의 영어 뜻을 한국어로 옮겼습니다.</p>
+    <h2>사전 출처</h2>
+    <p><strong>KANJIDIC2</strong> — James William Breen 및 Electronic Dictionary Research and Development Group (EDRDG). 2026-10-17 작성본에서 글자·학년·음독·훈독을 사용했습니다.</p>
+    <p lang="en">This project uses the KANJIDIC2 dictionary file. This file is the property of the Electronic Dictionary Research and Development Group, and is used in conformance with the Group’s licence.</p>
+    <p><a href="https://www.edrdg.org/wiki/index.php/KANJIDIC_Project">KANJIDIC 문서</a> · <a href="https://www.edrdg.org/edrdg/licence.html">EDRDG 라이선스</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></p>
+    <p><strong>libhangul</strong> — 한국 한자 훈음은 Choe Hwanjin의 <a href="https://github.com/libhangul/libhangul/blob/717409ce61524bb3d8426060a384822f21354c62/data/hanja/hanja.txt">hanja.txt</a>를 사용했습니다. 해당 파일은 BSD 3-Clause 라이선스입니다.</p>
+    <p><strong>Unicode Unihan 18.0.0</strong> — 상용한자 전체 집합을 독립 검증하고 한국 한자와 일본 표기의 이체자 대응을 확인했습니다. <a href="https://www.unicode.org/reports/tr38/">Unihan 문서</a> · <a href="https://www.unicode.org/license.txt">Unicode License V3</a></p>
+    <h2>이 앱에서 바꾼 부분</h2>
+    <ul>
+      <li>학년별로 묶고 각 그룹을 Unicode 코드포인트 순으로 정렬했습니다.</li>
+      <li>음독을 히라가나로 바꾸고 읽기의 오쿠리가나·접사 경계 기호를 제거했습니다.</li>
+      <li>구자체·이체자의 한국 훈음을 연결하고 중복 및 순수 이체자 참조 문구를 정리했습니다.</li>
+      <li>込·咲·捗·働·枠·丼·欧·姫·娘·机·沖은 KANJIDIC2 뜻을 바탕으로 한국어를 작성했습니다.</li>
+    </ul>
+    <p>결합한 상용한자 데이터는 <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>으로 제공합니다. 다시 이용할 때 출처와 변경 내역을 표시하고 같은 라이선스를 유지해야 합니다. 앱 코드와 기존 메뉴 자료의 라이선스는 별개입니다.</p>
+    <p><a href="https://github.com/DoK6n/jp-menus/blob/main/data/joyo-sources.md">자세한 출처와 재생성 방법</a> · <a href="https://github.com/DoK6n/jp-menus/blob/main/data/joyo_kanji.json">상용한자 데이터</a></p>
+    <details><summary>libhangul 저작권·라이선스 전문</summary><pre lang="en">Copyright (c) 2005,2006 Choe Hwanjin
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+3. Neither the name of the author nor the names of its contributors
+   may be used to endorse or promote products derived from this software
+   without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.</pre></details>
+    <details><summary>Unicode 저작권·라이선스 전문</summary><pre lang="en">UNICODE LICENSE V3
+
+COPYRIGHT AND PERMISSION NOTICE
+
+Copyright © 1991-2026 Unicode, Inc.
+
+NOTICE TO USER: Carefully read the following legal agreement. BY
+DOWNLOADING, INSTALLING, COPYING OR OTHERWISE USING DATA FILES, AND/OR
+SOFTWARE, YOU UNEQUIVOCALLY ACCEPT, AND AGREE TO BE BOUND BY, ALL OF THE
+TERMS AND CONDITIONS OF THIS AGREEMENT. IF YOU DO NOT AGREE, DO NOT
+DOWNLOAD, INSTALL, COPY, DISTRIBUTE OR USE THE DATA FILES OR SOFTWARE.
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of data files and any associated documentation (the &quot;Data Files&quot;) or
+software and any associated documentation (the &quot;Software&quot;) to deal in the
+Data Files or Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, and/or sell
+copies of the Data Files or Software, and to permit persons to whom the
+Data Files or Software are furnished to do so, provided that either (a)
+this copyright and permission notice appear with all copies of the Data
+Files or Software, or (b) this copyright and permission notice appear in
+associated Documentation.
+
+THE DATA FILES AND SOFTWARE ARE PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY
+KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF
+THIRD PARTY RIGHTS.
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR HOLDERS INCLUDED IN THIS NOTICE
+BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL INDIRECT OR CONSEQUENTIAL DAMAGES,
+OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THE DATA
+FILES OR SOFTWARE.
+
+Except as contained in this notice, the name of a copyright holder shall
+not be used in advertising or otherwise to promote the sale, use or other
+dealings in these Data Files or Software without prior written
+authorization of the copyright holder.
+</pre></details>
+    <p class="muted">자료 갱신 시 KANJIDIC2와 Unihan의 2,136자 집합, 학년별 수량, 모든 영구 ID와 필수 필드를 검증합니다.</p>
+  </main>
+</body>
+</html>

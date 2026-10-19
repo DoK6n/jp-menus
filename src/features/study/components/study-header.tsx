@@ -1,6 +1,6 @@
 import { createMemo } from "solid-js";
 
-import { totalItemCount } from "../../../data/catalogs";
+import { catalogItemCount } from "../../../data/catalogs";
 import type { MenuCatalog } from "../model";
 import { useStudyState } from "../state";
 
@@ -10,32 +10,34 @@ interface StudyHeaderProps {
 
 export function StudyHeader(props: StudyHeaderProps) {
   const state = useStudyState();
+  const isKanji = () => state.selectedScreen() === "kanji";
+  const totalItemCount = createMemo(() => props.library.reduce((total, catalog) => total + catalogItemCount(catalog), 0));
   const masteredCount = createMemo(() => state.totalMasteredCount(props.library));
-  const progress = createMemo(() => (masteredCount() * 100) / Math.max(totalItemCount, 1));
+  const progress = createMemo(() => (masteredCount() * 100) / Math.max(totalItemCount(), 1));
 
   const resetProgress = () => {
-    if (window.confirm("외운 항목 표시를 모두 초기화할까요?")) {
-      state.resetProgress();
+    if (window.confirm(`${isKanji() ? "상용한자" : "메뉴 단어"}의 외운 항목 표시를 모두 초기화할까요?`)) {
+      state.resetProgress(props.library);
     }
   };
 
   return (
-    <header class="px-4 pt-[max(1.25rem,env(safe-area-inset-top))] pb-4 sm:px-5">
+    <header class="px-4 pt-5 pb-4 sm:px-5">
       <div class="flex items-end justify-between gap-4">
         <div>
           <p class="text-[11px] font-bold tracking-[0.2em] text-accent uppercase">
-            日本のメニュー
+            {isKanji() ? "常用漢字" : "日本のメニュー"}
           </p>
           <h1 class="mt-1 text-[26px] leading-tight font-extrabold tracking-[-0.035em]">
-            일본 메뉴 정복
+            {isKanji() ? "상용한자 2,136" : "일본 메뉴 정복"}
           </h1>
         </div>
         <div class="shrink-0 text-right">
-          <p class="text-[11px] font-semibold text-muted">외운 단어</p>
-          <p class="mt-0.5 font-mono text-sm font-bold tabular-nums">
+          <p class="text-[11px] font-semibold text-muted">{isKanji() ? "외운 한자" : "외운 단어"}</p>
+          <p class="mt-0.5 font-mono text-sm font-bold tabular-nums" data-study-progress>
             {masteredCount()}
             <span class="px-1 text-line">/</span>
-            {totalItemCount}
+            {totalItemCount()}
           </p>
         </div>
       </div>
@@ -48,7 +50,7 @@ export function StudyHeader(props: StudyHeaderProps) {
       </div>
 
       <label class="relative mt-5 block">
-        <span class="sr-only">메뉴 검색</span>
+        <span class="sr-only">{isKanji() ? "한자 검색" : "메뉴 검색"}</span>
         <svg
           class="pointer-events-none absolute top-1/2 left-3.5 size-[18px] -translate-y-1/2 text-muted"
           viewBox="0 0 24 24"

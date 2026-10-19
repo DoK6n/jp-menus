@@ -1,0 +1,37 @@
+{
+  "kanjidic_creation_date": "2026-10-17",
+  "kanjidic_database_version": "2026-290",
+  "unihan_version": "18.0.0",
+  "source_files": {
+    "kanjidic2.xml.gz": {
+      "url": "https://www.edrdg.org/kanjidic/kanjidic2.xml.gz",
+      "sha256": "4e50a73955b9c70649d224554db713f8768b674400aa8f72e56f22bf498ca421"
+    },
+    "hanja.txt": {
+      "url": "https://raw.githubusercontent.com/libhangul/libhangul/717409ce61524bb3d8426060a384822f21354c62/data/hanja/hanja.txt",
+      "sha256": "b1004034589f1357daaea3534a6136f6b5ef825afa8779886b20f0b7908bbe3b"
+    },
+    "Unihan.zip": {
+      "url": "https://www.unicode.org/Public/18.0.0/ucd/Unihan.zip",
+      "sha256": "4c93ea9c1f636451729a840978f1667a53886af37ba854fdcce109721c63d43e"
+    }
+  },
+  "repertoire_sha256_utf8_no_newline": "3fa93c1d4f65fd4dc43b8b608110743bb29eb6759cc513a7ad24bb684b2bc2ea",
+  "grade_counts": {
+    "grade-1": 80,
+    "grade-2": 160,
+    "grade-3": 200,
+    "grade-4": 202,
+    "grade-5": 193,
+    "grade-6": 191,
+    "secondary": 1110
+  },
+  "korean_gloss_methods": {
+    "direct": 1835,
+    "kJapaneseOldVariant": 256,
+    "explicit-glyph": 20,
+    "kTraditionalVariant": 6,
+    "kZVariant": 8,
+    "translated": 11
+  }
+}
