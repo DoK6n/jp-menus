@@ -8,6 +8,7 @@ import { CategoryFilter } from "./components/category-filter";
 import { CellDetailSheet } from "./components/cell-detail-sheet";
 import { MenuTable } from "./components/menu-table";
 import { PullToRefreshIndicator } from "./components/pull-to-refresh-indicator";
+import { ScrollNavigation } from "./components/scroll-navigation";
 import { StudyHeader } from "./components/study-header";
 
 interface StudyPageProps {
@@ -17,6 +18,7 @@ interface StudyPageProps {
 export function StudyPage(props: StudyPageProps) {
   const state = createStudyState();
   let scrollContainer: HTMLElement | undefined;
+  let scrollContent: HTMLDivElement | undefined;
   const pullToRefresh = createPullToRefresh(() => scrollContainer);
 
   const handleScroll = (event: Event & { currentTarget: HTMLElement }) => {
@@ -30,27 +32,33 @@ export function StudyPage(props: StudyPageProps) {
 
   return (
     <StudyContext.Provider value={state}>
-      <main
-        ref={scrollContainer}
-        class="app-scroll mx-auto h-dvh w-full max-w-[480px] overflow-y-scroll overscroll-y-contain bg-surface text-ink shadow-[0_0_0_1px_rgba(32,32,30,0.04)]"
-        data-detail-open={String(Boolean(state.cellDetail()))}
-        data-pull-state={pullToRefresh.phase()}
-        onScroll={handleScroll}
-      >
-        <PullToRefreshIndicator
-          distance={pullToRefresh.pullDistance()}
-          phase={pullToRefresh.phase()}
-          threshold={pullToRefresh.threshold}
-        />
-        <StudyScreenNavigation />
-        <StudyHeader library={state.selectedScreen() === "kanji" ? kanjiLibrary : props.library} />
-        <Show when={state.selectedScreen() === "menus"}>
-          <MenuTabs library={props.library} />
-        </Show>
-        <CategoryFilter />
-        <MenuTable />
+      <div class="mx-auto flex h-dvh w-full max-w-[480px] flex-col bg-surface text-ink shadow-[0_0_0_1px_rgba(32,32,30,0.04)]">
+        <main
+          id="study-scroll"
+          ref={scrollContainer}
+          class="app-scroll min-h-0 w-full flex-1 overflow-y-scroll overscroll-y-contain"
+          data-detail-open={String(Boolean(state.cellDetail()))}
+          data-pull-state={pullToRefresh.phase()}
+          onScroll={handleScroll}
+        >
+          <div ref={scrollContent}>
+            <PullToRefreshIndicator
+              distance={pullToRefresh.pullDistance()}
+              phase={pullToRefresh.phase()}
+              threshold={pullToRefresh.threshold}
+            />
+            <StudyScreenNavigation />
+            <StudyHeader library={state.selectedScreen() === "kanji" ? kanjiLibrary : props.library} />
+            <Show when={state.selectedScreen() === "menus"}>
+              <MenuTabs library={props.library} />
+            </Show>
+            <CategoryFilter />
+            <MenuTable />
+          </div>
+        </main>
+        <ScrollNavigation scrollElement={() => scrollContainer} contentElement={() => scrollContent} />
         <CellDetailSheet />
-      </main>
+      </div>
     </StudyContext.Provider>
   );
 }

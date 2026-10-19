@@ -193,6 +193,13 @@ export function createStudyState() {
     loadMoreItems() {
       setVisibleItemLimit((current) => current + PAGE_SIZE);
     },
+
+    showAllItems(catalog: MenuCatalog) {
+      setVisibleItemLimit(filteredGroups(catalog).reduce(
+        (total, group) => total + group.items.length,
+        0,
+      ));
+    },
   };
 }
 

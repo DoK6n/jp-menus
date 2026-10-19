@@ -23,6 +23,7 @@ Codex uses `AGENTS.md` for repository instructions. This is the equivalent proje
 - Column concealment is ephemeral and starts fully visible on every new page load.
 - Pull-to-refresh is available only for a downward single-touch gesture that starts at the top of the app scroll container. Show progress feedback and reload only after the release threshold; preserve horizontal tab gestures and normal scrolling.
 - The mastery control has its own fixed-width cell and must never overlap vocabulary text.
+- Keep the circular top/bottom scroll controls at the app canvas's bottom right in reserved footer space, clear of study content. The bottom shortcut must reach the last item of the complete current filtered list, not only the currently rendered batch.
 - A mastered row is dimmed in place, remains reversible, and keeps its original order.
 - Persist mastered item IDs in browser local storage. A missing or malformed stored value must not prevent startup.
 - Keep menu and kanji progress summaries and resets scoped to their own screen while preserving the released storage key/schema and existing IDs.
@@ -86,6 +87,8 @@ Follow the proposed tree in `plan.md`. Important boundaries are:
 Do not create empty placeholder modules solely to match the full tree. Add a file when its phase is being implemented.
 
 ## Work sequence
+
+When the user asks to deploy, include committing the task changes, pushing them, and verifying the existing GitHub Pages deployment. A deployment request also authorizes its commit and push.
 
 1. Read `plan.md` and inspect the current tree and worktree status.
 2. Implement the smallest complete phase or user-requested vertical slice.
