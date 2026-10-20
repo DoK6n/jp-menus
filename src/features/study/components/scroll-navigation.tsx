@@ -13,8 +13,8 @@ export function ScrollNavigation(props: ScrollNavigationProps) {
   const [canScrollUp, setCanScrollUp] = createSignal(false);
   const [canScrollDown, setCanScrollDown] = createSignal(false);
   let pendingJump: number | undefined;
-  let topButton: HTMLButtonElement | undefined;
-  let bottomButton: HTMLButtonElement | undefined;
+  const hidden = () => Boolean(state.cellDetail()) || (!canScrollUp() && !canScrollDown());
+  const label = () => canScrollDown() ? "맨 아래로 이동" : "맨 위로 이동";
 
   const updatePosition = () => {
     const element = props.scrollElement();
@@ -36,10 +36,8 @@ export function ScrollNavigation(props: ScrollNavigationProps) {
 
   const goToTop = () => {
     cancelJump();
-    const returnFocus = document.activeElement === topButton;
     props.scrollElement()?.scrollTo({ top: 0, behavior: "instant" });
     updatePosition();
-    if (returnFocus) bottomButton?.focus({ preventScroll: true });
   };
 
   const goToBottom = () => {
@@ -47,7 +45,6 @@ export function ScrollNavigation(props: ScrollNavigationProps) {
     if (!catalog) return;
     cancelJump();
     const key = listKey();
-    const returnFocus = document.activeElement === bottomButton;
     state.showAllItems(catalog);
     // Wait for the full filtered list to be laid out before measuring its end.
     pendingJump = window.requestAnimationFrame(() => {
@@ -56,7 +53,6 @@ export function ScrollNavigation(props: ScrollNavigationProps) {
       if (!element || key !== listKey() || state.cellDetail()) return;
       element.scrollTo({ top: element.scrollHeight, behavior: "instant" });
       updatePosition();
-      if (returnFocus) topButton?.focus({ preventScroll: true });
     });
   };
 
@@ -83,37 +79,21 @@ export function ScrollNavigation(props: ScrollNavigationProps) {
   return (
     <nav
       aria-label="페이지 이동"
-      aria-hidden={Boolean(state.cellDetail())}
-      inert={Boolean(state.cellDetail())}
-      class="flex shrink-0 justify-end gap-2 border-t border-line bg-surface px-4 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] sm:px-5"
-      classList={{ invisible: Boolean(state.cellDetail()) }}
+      aria-hidden={hidden()}
+      inert={hidden()}
+      class="absolute right-[max(1rem,env(safe-area-inset-right))] bottom-[max(1rem,env(safe-area-inset-bottom))] z-30"
+      classList={{ invisible: hidden() }}
     >
       <button
-        ref={topButton}
         type="button"
-        aria-label="맨 위로 이동"
+        aria-label={label()}
         aria-controls="study-scroll"
-        title="맨 위로 이동"
-        disabled={!canScrollUp()}
-        onClick={goToTop}
-        class="grid size-11 place-items-center rounded-full border border-line bg-paper text-accent outline-none hover:bg-accent-soft active:bg-accent-soft focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:cursor-default disabled:opacity-35 disabled:hover:bg-paper"
+        title={label()}
+        onClick={() => canScrollDown() ? goToBottom() : goToTop()}
+        class="grid size-12 place-items-center rounded-full border border-line bg-paper text-accent shadow-md outline-none hover:bg-accent-soft active:bg-accent-soft focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
       >
         <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M5 4h14M12 20V8m-5 5 5-5 5 5" />
-        </svg>
-      </button>
-      <button
-        ref={bottomButton}
-        type="button"
-        aria-label="맨 아래로 이동"
-        aria-controls="study-scroll"
-        title="맨 아래로 이동"
-        disabled={!canScrollDown()}
-        onClick={goToBottom}
-        class="grid size-11 place-items-center rounded-full border border-line bg-paper text-accent outline-none hover:bg-accent-soft active:bg-accent-soft focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:cursor-default disabled:opacity-35 disabled:hover:bg-paper"
-      >
-        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M5 20h14M12 4v12m-5-5 5 5 5-5" />
+          <path d={canScrollDown() ? "M5 20h14M12 4v12m-5-5 5 5 5-5" : "M5 4h14M12 20V8m-5 5 5-5 5 5"} />
         </svg>
       </button>
     </nav>

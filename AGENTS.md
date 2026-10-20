@@ -23,7 +23,7 @@ Codex uses `AGENTS.md` for repository instructions. This is the equivalent proje
 - Column concealment is ephemeral and starts fully visible on every new page load.
 - Pull-to-refresh is available only for a downward single-touch gesture that starts at the top of the app scroll container. Show progress feedback and reload only after the release threshold; preserve horizontal tab gestures and normal scrolling.
 - The mastery control has its own fixed-width cell and must never overlap vocabulary text.
-- Keep the circular top/bottom scroll controls at the app canvas's bottom right in reserved footer space, clear of study content. The bottom shortcut must reach the last item of the complete current filtered list, not only the currently rendered batch.
+- Keep one circular scroll control floating over the app canvas's bottom right without reserving footer space. Show the downward action until the complete current filtered list's bottom is reached, then switch to the upward action; hide it when no scrolling is possible. The bottom shortcut must reach the last item of the complete filtered list, not only the currently rendered batch.
 - A mastered row is dimmed in place, remains reversible, and keeps its original order.
 - Persist mastered item IDs in browser local storage. A missing or malformed stored value must not prevent startup.
 - Keep menu and kanji progress summaries and resets scoped to their own screen while preserving the released storage key/schema and existing IDs.

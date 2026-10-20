@@ -32,7 +32,7 @@ export function StudyPage(props: StudyPageProps) {
 
   return (
     <StudyContext.Provider value={state}>
-      <div class="mx-auto flex h-dvh w-full max-w-[480px] flex-col bg-surface text-ink shadow-[0_0_0_1px_rgba(32,32,30,0.04)]">
+      <div class="relative mx-auto flex h-dvh w-full max-w-[480px] flex-col bg-surface text-ink shadow-[0_0_0_1px_rgba(32,32,30,0.04)]">
         <main
           id="study-scroll"
           ref={scrollContainer}
@@ -41,7 +41,7 @@ export function StudyPage(props: StudyPageProps) {
           data-pull-state={pullToRefresh.phase()}
           onScroll={handleScroll}
         >
-          <div ref={scrollContent}>
+          <div ref={scrollContent} class="pb-[calc(3rem+max(1rem,env(safe-area-inset-bottom)))]">
             <PullToRefreshIndicator
               distance={pullToRefresh.pullDistance()}
               phase={pullToRefresh.phase()}
