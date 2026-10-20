@@ -83,7 +83,7 @@ export function MenuRow(props: MenuRowProps) {
       class="border-b border-line/80 bg-surface transition-opacity last:border-b-0"
       classList={{ "opacity-35": state.isMastered(props.item.id) }}
     >
-      <td class="h-16 px-2 py-2 align-middle sm:px-2.5">
+      <td class="h-16 py-2 pr-2 pl-0 align-middle sm:pr-2.5">
         <StudyCell value={props.item.term} kind="term" />
       </td>
       <td class="h-16 px-1 py-2 align-middle sm:px-1.5">

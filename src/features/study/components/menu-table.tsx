@@ -45,7 +45,7 @@ export function MenuTable() {
       <p class="border-b border-line bg-surface px-4 py-2.5 text-xs leading-5 text-muted sm:px-5">
         열 제목을 누르면 답을 가릴 수 있어요.
       </p>
-      <table class="w-full table-fixed border-collapse">
+      <table class="mx-4 w-[calc(100%-2rem)] table-fixed border-collapse sm:mx-5 sm:w-[calc(100%-2.5rem)]">
         <caption class="sr-only">
           {isKanji() ? "일본 상용한자의 한자, 음독·훈독, 한국어 뜻 학습표" : "일본 메뉴의 일본어 표기, 후리가나, 한국어 뜻 학습표"}
         </caption>
@@ -75,7 +75,7 @@ export function MenuTable() {
                 <th
                   colSpan={4}
                   scope="rowgroup"
-                  class="border-y border-line bg-paper px-3 py-2 text-left sm:px-4"
+                  class="border-y border-line bg-paper px-0 py-2 text-left"
                 >
                   <span class="text-[11px] font-bold tracking-[0.08em] text-accent">
                     {group.label_ja}
@@ -124,7 +124,8 @@ function StudyColumnHeader(props: StudyColumnHeaderProps) {
         onClick={() => state.toggleColumn(props.column)}
         aria-pressed={hidden()}
         aria-label={`${props.label} 열 ${hidden() ? "보이기" : "가리기"}`}
-        class="group flex h-12 w-full items-center gap-1 px-2 text-left text-[11px] leading-tight font-extrabold text-muted outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset sm:px-3 sm:text-xs"
+        class="group flex h-12 w-full items-center gap-1 pr-2 text-left text-[11px] leading-tight font-extrabold text-muted outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset sm:pr-3 sm:text-xs"
+        classList={{ "pl-0": props.column === "term", "pl-2 sm:pl-3": props.column !== "term" }}
       >
         <span>{props.label}</span>
         <svg
