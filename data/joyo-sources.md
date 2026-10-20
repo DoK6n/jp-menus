@@ -91,3 +91,80 @@ npm run test:e2e
 동일한 원본 파일 세 개를 보관하고 있다면 `--download` 없이 실행해 재현할 수 있다. 원본 SHA-256, KANJIDIC 버전, 학년별 개수, 연결 방법별 개수는 `joyo-source-manifest.json`에 기록된다. 최신 사전의 개정이 있을 수 있으므로 갱신할 때 JSON 차이와 계약 테스트 결과를 검토한다.
 
 검증용 전체 글자 집합의 SHA-256은 `3fa93c1d4f65fd4dc43b8b608110743bb29eb6759cc513a7ad24bb684b2bc2ea`다. **숫자 코드포인트 순서**로 정렬한 2,136자를 구분자·마지막 줄바꿈 없이 UTF-8로 인코딩해 계산한다. JavaScript 기본 UTF-16 정렬은 사용하지 않는다. 검증용 TXT 파일 자체에는 마지막 줄바꿈이 있다.
+
+## 글자 모양 분해: KanjiVG
+
+`joyo_components.json`은 모든 상용한자 **2,136자**의 모양 구성 요소를 제공한다. 글자가 역사적으로 만들어진 과정이나 어원 설명이 아니다. 구성 요소의 한국어 뜻 역시 그 모양의 사전 뜻이며, 해당 요소가 글자의 뜻을 실제로 결정했다는 주장을 하지 않는다.
+
+### 원본과 라이선스
+
+- 프로젝트: [KanjiVG (Kanji Vector Graphics)](https://kanjivg.tagaini.net/)
+- 저작권: **© 2009–2026 Ulrich Apel**. 원본 SVG의 고지는 `Copyright (C) 2009/2010/2011 Ulrich Apel.`이다.
+- 원본 라이선스: [Creative Commons Attribution-ShareAlike 3.0 Unported](https://creativecommons.org/licenses/by-sa/3.0/)
+- 고정 소스: [KanjiVG 커밋 `70a0b7ae0c18ceb5cb358274b029cce0234a43bc`](https://github.com/KanjiVG/kanjivg/tree/70a0b7ae0c18ceb5cb358274b029cce0234a43bc), 2026-09-30
+- [SVG 구성 요소 형식](https://kanjivg.tagaini.net/svg-format.html), [부수·이체자 표기](https://kanjivg.tagaini.net/radicals.html), [손글씨와 인쇄 글꼴의 차이](https://kanjivg.tagaini.net/faq.html)
+
+This project uses KanjiVG by Ulrich Apel, available at https://kanjivg.tagaini.net/ under CC BY-SA 3.0. The original SVG group data has been transformed into component trees, position labels have been translated into Korean, and Korean dictionary meanings have been attached. No SVG drawings or stroke paths are included in the derived dataset.
+
+결합·변형한 구성 요소 데이터는 **CC BY-SA 4.0**으로 배포한다. KanjiVG 원본 저작권과 CC BY-SA 3.0 고지를 유지하며, 파생 데이터의 변경 내역과 CC BY-SA 4.0 링크도 함께 제공한다. 원본 3.0 라이선스 [제4조 (b)](https://creativecommons.org/licenses/by-sa/3.0/legalcode.en#s4b)는 같은 라이선스 요소를 사용하는 이후 버전으로 파생물을 배포할 수 있도록 한다. 기존 libhangul·Unihan·KANJIDIC의 고지도 그대로 적용된다.
+
+### 추출·뜻 연결 규칙
+
+1. 각 글자 코드포인트의 기본 SVG 파일 하나만 사용한다. 변형 SVG 파일을 임의로 대신 쓰지 않는다. 2,136자 모두 대응하는 원본 파일이 있다.
+2. `kvg:element`를 눈에 보이는 구성 요소 모양으로 사용하고, SVG 그룹에 실제로 포함된 하위 그룹만 따라간다. 다른 글자의 SVG를 재귀 호출해 분해를 만들어내지 않는다.
+3. `kvg:original`이 다른 글자를 명시하면 `original`에 보존하고 **원형 글자의 뜻**을 연결한다. 예: `亻`는 원형 `人`의 `사람 인`이다. 이는 KanjiVG가 표시한 대응을 전달하는 것이며 자체 어원 추론이 아니다.
+4. 뜻은 기존 `joyo_kanji.json`의 검토된 뜻·단일 글자 별칭을 우선한다. 그 밖에는 위에 고정한 libhangul의 실제 뜻, 명시적 사전 이체자 참조, Unihan의 `kJapaneseOldVariant`·`kTraditionalVariant`·`kZVariant`만 따라간다. 일반적인 의미 유사성으로 뜻을 추측하지 않는다. 사전 연결은 방문한 글자를 기록하고 6단계 이내로 제한하여 순환을 차단한다.
+5. `kvg:partial`이나 `kvg:part`가 있으면 `partial: true`로 표시한다. 획순 때문에 나뉘어 기록된 같은 모양은 `part` 번호를 유지한다. 예: `国`의 `囗` 1부분과 2부분을 두 개의 완전한 `囗`로 해석하면 안 된다.
+6. 이름 없는 SVG 그룹과 문자가 아닌 `CDP-8BC4`·`CDP-8CB8` 표식은 투명한 묶음으로 취급한다. 실제 글자로 표시된 하위 요소는 순서대로 유지하고, 이름 붙지 않은 획 수도 보존한다. 없는 글자 모양을 만들어 표시하지 않는다.
+7. 분해 트리는 SVG에 있는 유한한 그룹만 읽는다. 최대 원본 그룹 깊이 12를 넘으면 가져오기를 실패시킨다. 같은 글자가 여러 부분에 다시 나타나는 것은 자료의 일부이며, 참조 그래프의 순환이 아니다.
+8. 한국어 뜻을 확인할 수 없는 구성 요소는 `meaning_ko`를 생략한다. 화면은 `뜻 정보 없음`으로 표시해야 하며 공백이나 만들어낸 뜻으로 대체하지 않는다. 원본의 `マ`·`つ`처럼 가나와 닮은 모양 표기도 임의의 한자로 치환하지 않는다.
+
+KanjiVG는 일본어 손글씨의 모양을 바탕으로 하므로 화면 시스템 글꼴의 인쇄 모양과 차이가 있을 수 있다. 위치 표시는 원본에 명시된 경우만 한국어로 옮긴다. 구성 요소의 목록을 글자의 정확한 덧셈식으로 제시하지 않는다.
+
+### 데이터 스키마와 획수
+
+```typescript
+interface ComponentNode {
+  character: string;           // 한 Unicode 코드포인트: 한자, 부수, 드물게 가나 모양
+  meaning_ko?: string;         // 확인된 한국어 뜻; 미제공이면 생략
+  original?: string;           // 원본이 명시한, 표시 모양과 다른 원형
+  position_ko?: string;        // 형제 요소 사이의 상대 위치
+  partial?: boolean;          // 전체가 아닌 일부 모양/획순상 나뉜 부분
+  part?: number;              // 원본 kvg:part 번호
+  stroke_count: number;       // 이 그룹의 전체 획 수
+  ungrouped_strokes: number;  // 바로 아래 이름 있는 요소에 속하지 않은 획 수
+  children?: ComponentNode[]; // 실제 하위 요소가 있을 때만 존재
+}
+
+interface ComponentEntry {
+  components: ComponentNode[]; // 빈 배열: 원본이 더 작은 이름 있는 요소로 나누지 않음
+  stroke_count: number;
+  ungrouped_strokes: number;
+}
+
+// joyo_components.json
+// { schema_version: 1, entries: Record<string, ComponentEntry> }
+```
+
+모든 항목과 노드에서 `stroke_count = ungrouped_strokes + 직계 하위 요소들의 stroke_count 합`을 만족한다. 잎 노드의 모든 획은 그 노드에서 `ungrouped_strokes`에 들어간다. 이것은 자료가 누락되었다는 뜻이 아니라, **더 작은 이름 있는 하위 요소로 묶이지 않았다**는 뜻이다. 하위 요소가 없는 `一`와 `生`도 정상 항목이다.
+
+초기 추출 결과:
+
+- 2,136개 항목: 이름 있는 하위 요소가 있는 글자 2,070개, 더 나누지 않는 글자 66개
+- 구성 요소 노드 10,699개, 최대 표시 트리 깊이 7
+- 한국어 뜻이 있는 노드 10,256개; 뜻 미제공 443개 노드, 95종 모양
+- 일부 모양 노드 1,217개
+- 최소 JSON 표현 1,370,174바이트, gzip 압축 104,110바이트
+
+예시로 `休`는 `亻`(원형 `人`, 2획)와 `木`(4획), `森`은 위의 `木`(4획)와 아래의 `林`(8획)이며 `林` 아래에 `木` 두 개가 있다. `鬱`은 총 29획이다. 세부 통계, 모든 원본 SVG의 SHA-256, 원본 ZIP·사전의 SHA-256, 입력 상용한자 파일과 결과 파일 해시는 `joyo-component-source-manifest.json`에 기록한다.
+
+### 구성 요소 자료 재생성
+
+```powershell
+python scripts/import-kanji-components.py --source-dir "$env:TEMP/jp-menus-components" --download
+npm run check
+npm run build
+npm run test:e2e
+```
+
+Python 표준 라이브러리만 사용한다. 고정한 세 원본 파일을 이미 보관하고 있다면 `--download`를 생략한다. 원본 파일 해시가 고정값과 다르면 가져오기를 중단한다. 가져오기는 `joyo_components.json`과 구성 요소 manifest만 작성하며 **기존 `joyo_kanji.json`은 변경하지 않는다**. 원본 KanjiVG 버전을 올릴 때는 고정 커밋·해시와 원본 차이를 함께 검토한다.

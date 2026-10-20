@@ -11,6 +11,7 @@ Codex uses `AGENTS.md` for repository instructions. This is the equivalent proje
 - The first complete sushi-learning MVP is implemented.
 - The menu library contains 1,576 items across 12 catalogs, including 317 sushi items across 16 categories.
 - A separate Joyo kanji screen contains 2,136 characters in seven school-grade groups, with dictionary readings and Korean meanings.
+- Kanji cells open a full-height detail sheet with copyable values and expandable KanjiVG component trees for all 2,136 characters.
 - TypeScript checks, the Vite production build, data contract tests, and Playwright interaction tests are configured and passing.
 - Keep `plan.md` and this file aligned when product or architecture decisions change.
 
@@ -52,6 +53,7 @@ Codex uses `AGENTS.md` for repository instructions. This is the equivalent proje
 - Every catalog change must pass parsing, required-field, enum, minimum-count, and ID-uniqueness tests.
 - Keep `data/joyo_kanji.json` at exactly 2,136 unique characters; grade counts are 80, 160, 200, 202, 193, 191, and 1,110. Kanji IDs are `joyo-u` plus the lowercase hexadecimal code point.
 - Preserve the kanji source/license notices in `data/joyo-sources.md` and `public/joyo-sources.html`. Dictionary readings may exceed official Joyo readings; the screen must disclose this distinction.
+- Keep `data/joyo_components.json` aligned with all 2,136 Joyo characters. Preserve KanjiVG provenance, partial components, base forms and ungrouped strokes; shape breakdown is not a historical etymology. Do not invent missing component meanings.
 
 ## State boundaries
 
@@ -68,6 +70,7 @@ Codex uses `AGENTS.md` for repository instructions. This is the equivalent proje
 - Touch targets should be at least 44×44px even if the visible icon is smaller.
 - Provide strong `:focus-visible` styles and support `prefers-reduced-motion`.
 - Make the full value in the cell-detail bottom sheet a keyboard- and touch-operable copy control with immediate accessible feedback and a Clipboard API fallback.
+- Kanji details use the full viewport height within the 480px canvas, a fixed close header and an independently scrolling body. Show readings, meaning and expandable shape components with Korean meanings. Keep menu details compact and preserve focus trapping, Escape, and focus restoration for both.
 - Verify 320px, 375px, 430px, 480px, and a wide desktop viewport. There must be no horizontal page overflow at mobile widths.
 - Do not fetch webfonts for the MVP. Use the system Japanese/Korean font stack specified in `plan.md`.
 

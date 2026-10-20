@@ -1,40 +1,9 @@
-import { createSignal, onCleanup, onMount, Show } from "solid-js";
+import { onCleanup, Show } from "solid-js";
 
 import type { CellDetail } from "../model";
 import { useStudyState } from "../state";
-
-type CopyState = "idle" | "copied" | "failed";
-
-async function copyToClipboard(value: string): Promise<boolean> {
-  try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(value);
-      return true;
-    }
-  } catch {
-    // Fall through for browsers or installed web apps that deny Clipboard API access.
-  }
-
-  const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
-  const textArea = document.createElement("textarea");
-  textArea.value = value;
-  textArea.setAttribute("readonly", "");
-  textArea.style.position = "fixed";
-  textArea.style.inset = "0 auto auto -9999px";
-  textArea.style.opacity = "0";
-  document.body.append(textArea);
-  textArea.select();
-  textArea.setSelectionRange(0, value.length);
-
-  try {
-    return document.execCommand("copy");
-  } catch {
-    return false;
-  } finally {
-    textArea.remove();
-    if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
-  }
-}
+import { CopyValue } from "./copy-value";
+import { KanjiDetail } from "./kanji-detail";
 
 export function CellDetailSheet() {
   const state = useStudyState();
@@ -47,23 +16,21 @@ export function CellDetailSheet() {
 }
 
 function CellDetailContent(props: { detail: CellDetail; onClose: () => void }) {
-  const [copyState, setCopyState] = createSignal<CopyState>("idle");
   const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
   let dialog: HTMLElement | undefined;
-  let copyButton: HTMLButtonElement | undefined;
-  let resetTimer: number | undefined;
-
-  onMount(() => copyButton?.focus());
+  const isKanji = () => Boolean(props.detail.kanji);
 
   const handleKeyDown = (event: KeyboardEvent) => {
     if (event.key === "Escape") {
       event.preventDefault();
       props.onClose();
     } else if (event.key === "Tab") {
-      const buttons = dialog?.querySelectorAll<HTMLButtonElement>("button");
-      if (!buttons?.length) return;
-      const first = buttons[0];
-      const last = buttons[buttons.length - 1];
+      // Closed component branches must not enter the focus loop.
+      const controls = [...(dialog?.querySelectorAll<HTMLElement>(
+        'button:not(:disabled), a[href], summary, [tabindex]:not([tabindex="-1"])',
+      ) ?? [])].filter((element) => element.getClientRects().length > 0);
+      const first = controls[0];
+      const last = controls.at(-1);
       if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();
         last?.focus();
@@ -74,118 +41,55 @@ function CellDetailContent(props: { detail: CellDetail; onClose: () => void }) {
     }
   };
 
-  const handleCopy = async () => {
-    const copied = await copyToClipboard(props.detail.value);
-    setCopyState(copied ? "copied" : "failed");
-    if (resetTimer !== undefined) window.clearTimeout(resetTimer);
-    resetTimer = window.setTimeout(() => setCopyState("idle"), 1600);
-  };
-
   onCleanup(() => {
-    if (resetTimer !== undefined) window.clearTimeout(resetTimer);
-    previousFocus?.focus({ preventScroll: true });
+    if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
   });
-
-  const copyLabel = () => {
-    if (copyState() === "copied") return "복사됨";
-    if (copyState() === "failed") return "복사 실패";
-    return "복사";
-  };
 
   return (
     <div class="fixed inset-y-0 left-1/2 z-50 flex w-full max-w-[480px] -translate-x-1/2 items-end">
-      <button
-        type="button"
-        class="absolute inset-0 cursor-default bg-ink/30 backdrop-blur-[1px]"
-        aria-label="전체 내용 닫기"
-        onClick={props.onClose}
-      />
+      <Show when={!isKanji()}>
+        <button
+          type="button"
+          class="absolute inset-0 cursor-default bg-ink/30 backdrop-blur-[1px]"
+          aria-label="전체 내용 닫기"
+          onClick={props.onClose}
+        />
+      </Show>
       <section
         ref={dialog}
         role="dialog"
         aria-modal="true"
         aria-labelledby="cell-detail-title"
         onKeyDown={handleKeyDown}
-        class="relative z-10 max-h-[85dvh] w-full overflow-y-auto rounded-t-[28px] bg-surface px-5 pt-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-[0_-16px_40px_rgba(32,32,30,0.16)]"
+        class="relative z-10 flex w-full flex-col bg-surface shadow-[0_-16px_40px_rgba(32,32,30,0.16)]"
+        classList={{ "h-dvh": isKanji(), "max-h-[85dvh] rounded-t-[28px]": !isKanji() }}
       >
-        <div class="flex items-center justify-between gap-4">
-          <p
-            id="cell-detail-title"
-            class="text-xs font-bold tracking-[0.08em] text-accent"
-          >
-            {props.detail.label}
-          </p>
+        <div
+          class="flex shrink-0 items-center justify-between gap-4 px-5 pb-3"
+          classList={{ "border-b border-line pt-[max(0.75rem,env(safe-area-inset-top))]": isKanji(), "pt-5": !isKanji() }}
+        >
+          <h2 id="cell-detail-title" class="text-sm font-bold text-accent">
+            {props.detail.kanji ? `${props.detail.kanji.item.term} 한자 상세` : props.detail.label}
+          </h2>
           <button
             type="button"
             class="flex size-11 shrink-0 items-center justify-center rounded-full bg-paper text-muted outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-accent"
             aria-label="닫기"
             onClick={props.onClose}
           >
-            <svg
-              class="size-5"
-              viewBox="0 0 20 20"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              aria-hidden="true"
-            >
+            <svg class="size-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
               <path d="m4 4 12 12M16 4 4 16" />
             </svg>
           </button>
         </div>
-        <button
-          ref={copyButton}
-          type="button"
-          class="group mt-3 flex min-h-14 w-full items-start justify-between gap-3 rounded-xl px-2 py-2 text-left outline-none transition-colors hover:bg-paper active:bg-accent-soft focus-visible:ring-2 focus-visible:ring-accent"
-          aria-label={`${props.detail.value} 복사`}
-          onClick={handleCopy}
+        <div
+          class="min-h-0 overflow-y-auto overscroll-y-contain px-5 pt-3 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+          data-kanji-detail-body={isKanji() ? "" : undefined}
         >
-          <span class="min-w-0 text-[24px] leading-[1.45] font-bold tracking-[-0.025em] [overflow-wrap:anywhere] text-ink">
-            {props.detail.value}
-          </span>
-          <span
-            class="mt-1 flex min-h-8 shrink-0 items-center gap-1.5 rounded-full bg-paper px-2.5 text-xs font-bold text-muted group-active:text-accent"
-            aria-hidden="true"
-          >
-            <Show
-              when={copyState() === "copied"}
-              fallback={
-                <svg
-                  class="size-4"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.7"
-                  aria-hidden="true"
-                >
-                  <rect x="6.5" y="6.5" width="9" height="9" rx="1.5" />
-                  <path d="M13.5 6.5V5A1.5 1.5 0 0 0 12 3.5H5A1.5 1.5 0 0 0 3.5 5v7A1.5 1.5 0 0 0 5 13.5h1.5" />
-                </svg>
-              }
-            >
-              <svg
-                class="size-4 text-accent"
-                viewBox="0 0 20 20"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <path d="m4 10 4 4 8-8" />
-              </svg>
-            </Show>
-            {copyLabel()}
-          </span>
-        </button>
-        <p class="sr-only" role="status" aria-live="polite">
-          {copyState() === "copied"
-            ? `${props.detail.value} 복사됨`
-            : copyState() === "failed"
-              ? "클립보드에 복사하지 못했습니다"
-              : ""}
-        </p>
+          <Show when={props.detail.kanji} fallback={<CopyValue value={props.detail.value} autofocus />}>
+            {(kanji) => <KanjiDetail item={kanji().item} selectedColumn={kanji().column} />}
+          </Show>
+        </div>
       </section>
     </div>
   );

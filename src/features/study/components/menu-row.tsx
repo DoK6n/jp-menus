@@ -27,6 +27,7 @@ function fitLevel(kind: CellKind, displayWidth: number): "normal" | "compact" | 
 interface StudyCellProps {
   value: string;
   kind: CellKind;
+  item: MenuItem;
   readings?: { on: string[]; kun: string[] };
 }
 
@@ -43,7 +44,9 @@ function StudyCell(props: StudyCellProps) {
       disabled={hidden()}
       aria-label={hidden() ? `${label()} 가려짐` : `${label()} 전체 내용 보기: ${props.value}`}
       title={hidden() ? undefined : props.value}
-      onClick={() => state.openCellDetail(label(), props.value)}
+      onClick={() => state.openCellDetail(label(), props.value, state.selectedScreen() === "kanji"
+        ? { item: props.item, column: props.kind }
+        : undefined)}
     >
       <span
         class="cell-content study-cell-text"
@@ -84,12 +87,13 @@ export function MenuRow(props: MenuRowProps) {
       classList={{ "opacity-35": state.isMastered(props.item.id) }}
     >
       <td class="h-16 py-2 pr-2 pl-0 align-middle sm:pr-2.5">
-        <StudyCell value={props.item.term} kind="term" />
+        <StudyCell value={props.item.term} kind="term" item={props.item} />
       </td>
       <td class="h-16 px-1 py-2 align-middle sm:px-1.5">
         <StudyCell
           value={props.item.reading}
           kind="reading"
+          item={props.item}
           readings={state.selectedScreen() === "kanji" ? {
             on: props.item.reading_on ?? [],
             kun: props.item.reading_kun ?? [],
@@ -97,7 +101,7 @@ export function MenuRow(props: MenuRowProps) {
         />
       </td>
       <td class="h-16 px-1.5 py-2 align-middle sm:px-2">
-        <StudyCell value={props.item.meaning_ko} kind="meaning" />
+        <StudyCell value={props.item.meaning_ko} kind="meaning" item={props.item} />
       </td>
       <td class="h-16 w-11 p-0 align-middle">
         <MasteryButton itemId={props.item.id} term={props.item.term} />

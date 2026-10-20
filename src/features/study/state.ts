@@ -149,8 +149,8 @@ export function createStudyState() {
       });
     },
 
-    openCellDetail(label: string, value: string) {
-      setCellDetail({ label, value });
+    openCellDetail(label: string, value: string, kanji?: CellDetail["kanji"]) {
+      setCellDetail({ label, value, kanji });
     },
 
     closeCellDetail() {

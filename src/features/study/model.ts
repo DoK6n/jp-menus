@@ -34,6 +34,7 @@ export interface DisplayGroup extends Omit<MenuCategory, "items"> {
 export interface CellDetail {
   label: string;
   value: string;
+  kanji?: { item: MenuItem; column: StudyColumn };
 }
 
 export type StudyColumn = "term" | "reading" | "meaning";
