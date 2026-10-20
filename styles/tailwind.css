@@ -59,6 +59,32 @@
     overflow-y: hidden;
   }
 
+  /* Extend header bands through the text gutters without changing table geometry. */
+  .study-table th:first-child::before,
+  .study-table th:last-child::after {
+    content: "";
+    position: absolute;
+    inset-block: 0 -1px;
+    width: var(--study-gutter);
+    border-block: inherit;
+    background: var(--color-paper);
+    pointer-events: none;
+  }
+
+  .study-table th:first-child::before {
+    right: 100%;
+  }
+
+  .study-table th:last-child::after {
+    left: 100%;
+  }
+
+  /* Collapsed borders extend beyond the cell padding box used by absolute children. */
+  .study-table th[scope="rowgroup"]::before,
+  .study-table th[scope="rowgroup"]::after {
+    top: -1px;
+  }
+
   .pull-refresh-indicator {
     visibility: visible;
     will-change: opacity, transform;

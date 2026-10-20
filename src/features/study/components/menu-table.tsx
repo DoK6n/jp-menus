@@ -45,7 +45,7 @@ export function MenuTable() {
       <p class="border-b border-line bg-surface px-4 py-2.5 text-xs leading-5 text-muted sm:px-5">
         열 제목을 누르면 답을 가릴 수 있어요.
       </p>
-      <table class="mx-4 w-[calc(100%-2rem)] table-fixed border-collapse sm:mx-5 sm:w-[calc(100%-2.5rem)]">
+      <table class="study-table mx-4 w-[calc(100%-2rem)] table-fixed border-collapse [--study-gutter:1rem] sm:mx-5 sm:w-[calc(100%-2.5rem)] sm:[--study-gutter:1.25rem]">
         <caption class="sr-only">
           {isKanji() ? "일본 상용한자의 한자, 음독·훈독, 한국어 뜻 학습표" : "일본 메뉴의 일본어 표기, 후리가나, 한국어 뜻 학습표"}
         </caption>
@@ -75,7 +75,7 @@ export function MenuTable() {
                 <th
                   colSpan={4}
                   scope="rowgroup"
-                  class="border-y border-line bg-paper px-0 py-2 text-left"
+                  class="relative border-y border-line bg-paper px-0 py-2 text-left"
                 >
                   <span class="text-[11px] font-bold tracking-[0.08em] text-accent">
                     {group.label_ja}
